@@ -1,0 +1,226 @@
+<%
+    // Small helper to rebuild the /listings query string with one field
+    // overridden or removed — used by the "Filters" panel toggle state
+    // and by the active-filter chip "remove" links below.
+    function buildFilterQuery(overrides) {
+        const base = {
+            search: typeof search !== 'undefined' ? search : '',
+            category: typeof category !== 'undefined' ? category : '',
+            minPrice: typeof minPrice !== 'undefined' ? minPrice : '',
+            maxPrice: typeof maxPrice !== 'undefined' ? maxPrice : '',
+            minRating: typeof minRating !== 'undefined' ? minRating : '',
+            sort: typeof sort !== 'undefined' ? sort : ''
+        };
+        Object.assign(base, overrides || {});
+        return Object.entries(base)
+            .filter(([k, v]) => v !== '' && v !== undefined && v !== null)
+            .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
+            .join('&');
+    }
+
+    const hasMinPrice = typeof minPrice !== 'undefined' && minPrice;
+    const hasMaxPrice = typeof maxPrice !== 'undefined' && maxPrice;
+    const hasMinRating = typeof minRating !== 'undefined' && minRating;
+    const hasSort = typeof sort !== 'undefined' && sort && sort !== 'newest';
+    const hasCategory = typeof category !== 'undefined' && category;
+    const hasAdvancedFilter = hasMinPrice || hasMaxPrice || hasMinRating || hasSort;
+    const hasAnyFilter = hasAdvancedFilter || hasCategory;
+
+    const sortLabels = {
+        price_asc: 'Price: Low to High',
+        price_desc: 'Price: High to Low',
+        rating: 'Top Rated'
+    };
+%>
+
+<nav class="navbar navbar-expand-lg sticky-top custom-navbar">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/listings">
+            <i class="fa-solid fa-plane-departure"></i> DreamStay
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <form class="search-box mx-auto position-relative" action="/listings" method="GET">
+                <i class="fa-solid fa-location-dot"></i>
+                <input id="searchInput" type="search" name="search" autocomplete="off" placeholder="Search destination">
+                <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                <div id="searchSuggestions" class="search-suggestions"></div>
+            </form>
+
+            <!-- ================= FILTERS BUTTON (lives in navbar so panel always opens near the top, visible regardless of scroll) ================= -->
+
+            <div class="nav-filters-wrap">
+
+                <button type="button" id="filtersToggleBtn" class="filters-nav-btn <%= hasAdvancedFilter ? 'active' : '' %>">
+                    <i class="fa-solid fa-sliders"></i>
+                    <% if(hasAdvancedFilter){ %><span class="filters-nav-dot"></span><% } %>
+                </button>
+
+                <div class="advanced-filters-panel" id="advancedFiltersPanel">
+                    <div class="advanced-filters">
+                        <div class="advanced-filter-field">
+                            <label>Min Price (₹)</label>
+                            <input form="filterForm" type="number" name="minPrice" min="0" placeholder="0" value="<%= typeof minPrice !== 'undefined' && minPrice ? minPrice : '' %>">
+                        </div>
+                        <div class="advanced-filter-field">
+                            <label>Max Price (₹)</label>
+                            <input form="filterForm" type="number" name="maxPrice" min="0" placeholder="Any" value="<%= typeof maxPrice !== 'undefined' && maxPrice ? maxPrice : '' %>">
+                        </div>
+                        <div class="advanced-filter-field">
+                            <label>Min Rating</label>
+                            <select form="filterForm" name="minRating">
+                                <option value="" <%= (typeof minRating === 'undefined' || !minRating) ? 'selected' : '' %>>Any</option>
+                                <option value="3" <%= typeof minRating !== 'undefined' && minRating === '3' ? 'selected' : '' %>>3+ ⭐</option>
+                                <option value="4" <%= typeof minRating !== 'undefined' && minRating === '4' ? 'selected' : '' %>>4+ ⭐</option>
+                                <option value="4.5" <%= typeof minRating !== 'undefined' && minRating === '4.5' ? 'selected' : '' %>>4.5+ ⭐</option>
+                            </select>
+                        </div>
+                        <div class="advanced-filter-field">
+                            <label>Sort By</label>
+                            <select form="filterForm" name="sort">
+                                <option value="newest" <%= (typeof sort === 'undefined' || !sort || sort === 'newest') ? 'selected' : '' %>>Newest</option>
+                                <option value="price_asc" <%= typeof sort !== 'undefined' && sort === 'price_asc' ? 'selected' : '' %>>Price: Low to High</option>
+                                <option value="price_desc" <%= typeof sort !== 'undefined' && sort === 'price_desc' ? 'selected' : '' %>>Price: High to Low</option>
+                                <option value="rating" <%= typeof sort !== 'undefined' && sort === 'rating' ? 'selected' : '' %>>Top Rated</option>
+                            </select>
+                        </div>
+                        <div class="advanced-filter-field advanced-filter-actions">
+                            <button form="filterForm" type="submit" name="category" value="<%= typeof category !== 'undefined' && category ? category : '' %>" class="apply-filters-btn">Apply Filters</button>
+                            <% if(hasAnyFilter){ %>
+                                <a href="/listings" class="clear-filters-btn">Clear</a>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="dropdown">
+                <button class="btn menu-btn" data-bs-toggle="dropdown"><i class="fa-solid fa-bars"></i></button>
+                <ul class="dropdown-menu dropdown-menu-end dream-dropdown">
+                    <% if(!currUser){ %>
+                        <li><a class="dropdown-item" href="/login"><i class="fa-solid fa-right-to-bracket"></i> Login</a></li>
+                        <li><a class="dropdown-item" href="/signup"><i class="fa-solid fa-user-plus"></i> Sign Up</a></li>
+                    <% } else { %>
+                        <li class="dropdown-header"><i class="fa-solid fa-circle-user"></i> Welcome, <strong><%= currUser.username %></strong></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/profile"><i class="fa-solid fa-user"></i> My Profile</a></li>
+                        <li><a class="dropdown-item" href="/listings/mine"><i class="fa-solid fa-building"></i> My Listings</a></li>
+                        <li><a class="dropdown-item" href="/notifications"><i class="fa-solid fa-bell"></i> Notifications</a></li>
+                        <li>
+                            <a class="dropdown-item" href="/chat">
+                                <i class="fa-solid fa-comment-dots"></i> Messages
+                                <% if(typeof unreadMessagesCount !== 'undefined' && unreadMessagesCount > 0){ %>
+                                    <span class="badge bg-danger ms-1"><%= unreadMessagesCount %></span>
+                                <% } %>
+                            </a>
+                        </li>
+                        <li><a class="dropdown-item" href="/bookings/cancelled"><i class="fa-solid fa-clock-rotate-left"></i> Cancellation History</a></li>
+                        <li><a class="dropdown-item" href="/trip-planner"><i class="fa-solid fa-robot"></i> AI Trip Planner</a></li>
+                        <li><a class="dropdown-item" href="/listings/new"><i class="fa-solid fa-plus"></i> Add Listing</a></li>
+                        <li><a class="dropdown-item" href="/bookings"><i class="fa-solid fa-calendar-check"></i> My Bookings</a></li>
+                        <li><a class="dropdown-item" href="/bookings/hosting"><i class="fa-solid fa-house-user"></i> Hosting Dashboard</a></li>
+                        <li><a class="dropdown-item" href="/wishlist"><i class="fa-solid fa-heart"></i> Wishlist</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item logout-item" href="/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ================= CATEGORY FILTERS ================= -->
+
+<form action="/listings" method="GET" id="filterForm">
+    <input type="hidden" name="search" value="<%= typeof search !== 'undefined' && search ? search : '' %>">
+    <div class="filters filters-sticky">
+        <button type="submit" name="category" value="" class="filter <%= typeof category === 'undefined' || !category ? 'active' : '' %>">
+            <div class="filter-icon"><i class="fa-solid fa-border-all"></i></div><span>All</span>
+        </button>
+        <button type="submit" name="category" value="Beach" class="filter <%= typeof category !== 'undefined' && category === 'Beach' ? 'active' : '' %>">
+            <div class="filter-icon"><i class="fa-solid fa-umbrella-beach"></i></div><span>Beach</span>
+        </button>
+        <button type="submit" name="category" value="Mountain" class="filter <%= typeof category !== 'undefined' && category === 'Mountain' ? 'active' : '' %>">
+            <div class="filter-icon"><i class="fa-solid fa-mountain"></i></div><span>Mountain</span>
+        </button>
+        <button type="submit" name="category" value="Camping" class="filter <%= typeof category !== 'undefined' && category === 'Camping' ? 'active' : '' %>">
+            <div class="filter-icon"><i class="fa-solid fa-campground"></i></div><span>Camping</span>
+        </button>
+        <button type="submit" name="category" value="Villa" class="filter <%= typeof category !== 'undefined' && category === 'Villa' ? 'active' : '' %>">
+            <div class="filter-icon"><i class="fa-solid fa-hotel"></i></div><span>Villa</span>
+        </button>
+        <button type="submit" name="category" value="Lake" class="filter <%= typeof category !== 'undefined' && category === 'Lake' ? 'active' : '' %>">
+            <div class="filter-icon"><i class="fa-solid fa-water"></i></div><span>Lake</span>
+        </button>
+        <button type="submit" name="category" value="Forest" class="filter <%= typeof category !== 'undefined' && category === 'Forest' ? 'active' : '' %>">
+            <div class="filter-icon"><i class="fa-solid fa-tree"></i></div><span>Forest</span>
+        </button>
+        <button type="submit" name="category" value="Snow" class="filter <%= typeof category !== 'undefined' && category === 'Snow' ? 'active' : '' %>">
+            <div class="filter-icon"><i class="fa-solid fa-snowflake"></i></div><span>Snow</span>
+        </button>
+        <button type="submit" name="category" value="City" class="filter <%= typeof category !== 'undefined' && category === 'City' ? 'active' : '' %>">
+            <div class="filter-icon"><i class="fa-solid fa-city"></i></div><span>City</span>
+        </button>
+    </div>
+</form>
+
+<% if (hasAnyFilter) { %>
+<div class="active-filter-chips">
+
+    <% if (hasCategory) { %>
+        <a href="/listings?<%= buildFilterQuery({ category: '' }) %>" class="filter-chip">
+            <%= category %> <span class="chip-x"><i class="fa-solid fa-xmark"></i></span>
+        </a>
+    <% } %>
+
+    <% if (hasMinPrice) { %>
+        <a href="/listings?<%= buildFilterQuery({ minPrice: '' }) %>" class="filter-chip">
+            Min ₹<%= minPrice %> <span class="chip-x"><i class="fa-solid fa-xmark"></i></span>
+        </a>
+    <% } %>
+
+    <% if (hasMaxPrice) { %>
+        <a href="/listings?<%= buildFilterQuery({ maxPrice: '' }) %>" class="filter-chip">
+            Max ₹<%= maxPrice %> <span class="chip-x"><i class="fa-solid fa-xmark"></i></span>
+        </a>
+    <% } %>
+
+    <% if (hasMinRating) { %>
+        <a href="/listings?<%= buildFilterQuery({ minRating: '' }) %>" class="filter-chip">
+            <%= minRating %>+ ⭐ <span class="chip-x"><i class="fa-solid fa-xmark"></i></span>
+        </a>
+    <% } %>
+
+    <% if (hasSort) { %>
+        <a href="/listings?<%= buildFilterQuery({ sort: '' }) %>" class="filter-chip">
+            <%= sortLabels[sort] || sort %> <span class="chip-x"><i class="fa-solid fa-xmark"></i></span>
+        </a>
+    <% } %>
+
+    <a href="/listings" class="clear-filters-btn clear-filters-chip">Clear all</a>
+
+</div>
+<% } %>
+
+<script>
+(function () {
+    const toggleBtn = document.getElementById('filtersToggleBtn');
+    const panel = document.getElementById('advancedFiltersPanel');
+
+    if (!toggleBtn || !panel) return;
+
+    toggleBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!panel.contains(e.target) && e.target !== toggleBtn && !toggleBtn.contains(e.target)) {
+            panel.classList.remove('open');
+        }
+    });
+})();
+</script>

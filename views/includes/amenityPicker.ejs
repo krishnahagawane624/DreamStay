@@ -1,0 +1,37 @@
+<!-- ===== AI-free, host-controlled amenity picker (search + select, not free typing) ===== -->
+<div class="mb-3">
+
+    <label class="form-label">Amenities</label>
+
+    <div class="amenity-picker" id="amenity-picker">
+
+        <div class="amenity-picker-input-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input
+                type="text"
+                id="amenity-search-input"
+                placeholder="Search amenities — wifi, pool, parking, pet friendly..."
+                autocomplete="off">
+        </div>
+
+        <div class="amenity-suggestions" id="amenity-suggestions"></div>
+
+        <div class="amenity-chips" id="amenity-chips"></div>
+
+        <p class="amenity-empty-hint text-muted" id="amenity-empty-hint">
+            No amenities selected yet — search above to add some.
+        </p>
+
+        <div id="amenity-hidden-inputs"></div>
+
+    </div>
+
+</div>
+
+<script id="amenities-catalog-data" type="application/json">
+    <%- JSON.stringify(amenitiesCatalog || []) %>
+</script>
+
+<script id="selected-amenities-data" type="application/json">
+    <%- JSON.stringify(typeof listing !== "undefined" && listing.amenities ? listing.amenities : []) %>
+</script>

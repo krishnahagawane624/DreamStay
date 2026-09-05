@@ -1,0 +1,336 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .current-images-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .current-images-grid img {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+    }
+
+    .image-preview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .image-preview-grid img {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+    }
+
+    .upload-dropzone {
+        border: 1.5px dashed #ccc;
+        border-radius: 12px;
+        padding: 28px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .upload-dropzone:hover,
+    .upload-dropzone.dragover {
+        border-color: #ff385c;
+        background-color: #fff5f6;
+    }
+
+    .upload-dropzone p {
+        margin: 0;
+        color: #717171;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="row mt-3">
+    <div class="col-8 offset-2">
+    <h3>Edit Your Listing</h3>
+<form
+    method="POST"
+    action="/listings/<%= listing._id %>?_method=PUT"
+    enctype="multipart/form-data"
+    novalidate
+    class="needs-validation">
+
+         <div class="mb-3">
+              <label for="title" class="form-label">Title</label>
+<input name="listing[title]" id="title-input" value="<%= listing.title %>" type="text" class="form-control" required/>             <div class="valid-feedback">Title looks good!</div>
+         </div>
+
+<div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <label for="description" class="form-label mb-0">Description</label>
+                    <button type="button" id="ai-generate-btn" class="btn btn-sm btn-outline-dark">
+                        ✨ Generate with AI
+                    </button>
+                </div>
+              <textarea name="listing[description]" id="description-input" class="form-control" required><%= listing.description %></textarea>
+                <div class="invalid-feedback">Please enter a short desrcription</div>
+                <small class="text-muted" id="ai-generate-status"></small>
+      </div>
+
+        <div class="mb-3">
+
+            <label class="form-label">Current Photos</label>
+
+            <% const currentImages = (listing.images && listing.images.length > 0) ? listing.images : (listing.image ? [listing.image] : []); %>
+
+            <% if (currentImages.length > 0) { %>
+
+                <div class="current-images-grid">
+
+                    <% for (let img of currentImages) { %>
+
+                        <img
+                            src="<%= img.url %>"
+                            alt="Listing photo">
+
+                    <% } %>
+
+                </div>
+
+            <% } else { %>
+
+                <p class="text-muted">No photos yet.</p>
+
+            <% } %>
+
+        </div>
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Upload New Photos (up to 8 — replaces all existing photos if you select any)
+            </label>
+
+            <div class="upload-dropzone" id="upload-dropzone">
+                <p>Drag photos here or click to browse</p>
+                <p>JPEG or PNG · up to 8 photos</p>
+            </div>
+
+            <input
+                type="file"
+                name="listing[images]"
+                id="image-input"
+                accept="image/png, image/jpeg, image/jpg"
+                multiple
+                hidden>
+
+            <div class="image-preview-grid" id="image-preview-grid"></div>
+
+        </div>
+
+       <div class="row">
+            <div class="mb-3 col-md-4">
+                    <label for="price" class="form-label">Price</label>
+<input name="listing[price]" id="price-input" value="<%= listing.price %>" type="number" class="form-control" required/>                                       <div class="invalid-feedback">Price should be valid</div>
+
+            </div>
+         
+        <div class="mb-3 col-md-8">
+                <label for="country" class="form-label">Country</label>
+                  <input name="listing[country]" id="country-input" value="<%= listing.country %>"type="text" class="form-control" required/>
+                                        <div class="invalid-feedback">Country should be valid </div>
+
+        </div>
+        </div>
+
+
+ <div class="mb-3">
+    <label for="category" class="form-label">Category</label>
+
+  <select
+        name="listing[category]"
+        class="form-select"
+        id="category-input"
+        required>
+
+        <option value="Beach" <%= listing.category === "Beach" ? "selected" : "" %>>
+            🏖 Beach
+        </option>
+
+        <option value="Mountain" <%= listing.category === "Mountain" ? "selected" : "" %>>
+            ⛰ Mountain
+        </option>
+
+        <option value="Camping" <%= listing.category === "Camping" ? "selected" : "" %>>
+            🏕 Camping
+        </option>
+
+        <option value="Villa" <%= listing.category === "Villa" ? "selected" : "" %>>
+            🏡 Villa
+        </option>
+
+        <option value="Lake" <%= listing.category === "Lake" ? "selected" : "" %>>
+            🌊 Lake
+        </option>
+
+        <option value="Forest" <%= listing.category === "Forest" ? "selected" : "" %>>
+            🌲 Forest
+        </option>
+
+        <option value="Snow" <%= listing.category === "Snow" ? "selected" : "" %>>
+            ❄ Snow
+        </option>
+
+        <option value="City" <%= listing.category === "City" ? "selected" : "" %>>
+            🏙 City
+        </option>
+
+        <option value="Luxury" <%= listing.category === "Luxury" ? "selected" : "" %>>
+            💎 Luxury
+        </option>
+
+        <option value="Desert" <%= listing.category === "Desert" ? "selected" : "" %>>
+            🏜 Desert
+        </option>
+
+        <option value="Heritage" <%= listing.category === "Heritage" ? "selected" : "" %>>
+            🏰 Heritage
+        </option>
+
+        <option value="Trending" <%= listing.category === "Trending" ? "selected" : "" %>>
+            🔥 Trending
+        </option>
+
+    </select>
+</div>
+
+         <%- include("../includes/amenityPicker") %>
+
+         <div class="mb-3">
+                         <label for="location" class="form-label">Location</label>
+                    <input name="listing[location]" id="location-input" value="<%= listing.location %>"type="text" class="form-control" required/>
+  <div class="invalid-feedback">Location should be valid</div>
+         </div>
+
+         <!-- ===== LOCATION PICKER MAP ===== -->
+         <div class="mb-3">
+             <label class="form-label">Or pick exact location on map (optional)</label>
+             <div id="location-picker-map" data-existing-coordinates='<%- JSON.stringify(listing.geometry.coordinates) %>'></div>
+             <small class="text-muted">Click anywhere on the map to update location & country above</small>
+         </div>
+
+         <input type="hidden" name="listing[geometry][coordinates][0]" id="picked-lng">
+         <input type="hidden" name="listing[geometry][coordinates][1]" id="picked-lat">
+
+         <button class="btn btn-dark edit-btn mt-3">Edit</button>
+    </form>
+    </div>
+</div>
+
+<script>
+    // ===== Multi-image select + live preview (dropzone wraps the hidden file input) =====
+    (function () {
+        const dropzone = document.getElementById("upload-dropzone");
+        const input = document.getElementById("image-input");
+        const previewGrid = document.getElementById("image-preview-grid");
+        const MAX_FILES = 8;
+
+        function renderPreviews(fileList) {
+            previewGrid.innerHTML = "";
+            Array.from(fileList).slice(0, MAX_FILES).forEach((file) => {
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(file);
+                img.onload = () => URL.revokeObjectURL(img.src);
+                previewGrid.appendChild(img);
+            });
+        }
+
+        dropzone.addEventListener("click", () => input.click());
+
+        input.addEventListener("change", () => renderPreviews(input.files));
+
+        dropzone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropzone.classList.add("dragover");
+        });
+
+        dropzone.addEventListener("dragleave", () => {
+            dropzone.classList.remove("dragover");
+        });
+
+        dropzone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropzone.classList.remove("dragover");
+            if (e.dataTransfer.files?.length) {
+                input.files = e.dataTransfer.files;
+                renderPreviews(input.files);
+            }
+        });
+    })();
+</script>
+
+<script src="/js/amenityPicker.js"></script>
+
+<script>
+    (function () {
+        const generateBtn = document.getElementById("ai-generate-btn");
+        const statusEl = document.getElementById("ai-generate-status");
+        const descriptionInput = document.getElementById("description-input");
+
+        if (!generateBtn) return;
+
+        generateBtn.addEventListener("click", async () => {
+
+            const title = document.getElementById("title-input")?.value.trim();
+            const category = document.getElementById("category-input")?.value;
+            const location = document.getElementById("location-input")?.value.trim();
+            const country = document.getElementById("country-input")?.value.trim();
+            const price = document.getElementById("price-input")?.value.trim();
+            const amenities = document.getElementById("amenity-picker")?.getSelectedAmenityLabels?.() || "";
+
+            if (!title || !location || !country || !price) {
+                statusEl.textContent = "Fill in title, location, country, and price first.";
+                statusEl.className = "text-danger";
+                return;
+            }
+
+            generateBtn.disabled = true;
+            statusEl.textContent = "Generating...";
+            statusEl.className = "text-muted";
+
+            try {
+
+                const res = await fetch("/listings/generate-description", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title, category, location, country, price, amenities }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || "Generation failed");
+                }
+
+                descriptionInput.value = data.description;
+                statusEl.textContent = "Generated — feel free to edit it.";
+                statusEl.className = "text-success";
+
+            } catch (err) {
+
+                console.error(err);
+                statusEl.textContent = "Couldn't generate a description. Try again.";
+                statusEl.className = "text-danger";
+
+            } finally {
+
+                generateBtn.disabled = false;
+
+            }
+
+        });
+    })();
+</script>

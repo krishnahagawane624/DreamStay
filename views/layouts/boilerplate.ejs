@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DreamStay</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+        crossorigin="anonymous">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+        integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer">
+
+    <!-- MapLibre CSS -->
+    <link
+        href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css"
+        rel="stylesheet">
+
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+   
+<!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <%- include("../includes/navbar") %>
+
+    <%- include("../includes/flash") %>
+
+    <div class="container">
+        <%- body %>
+    </div>
+
+    <!-- ===== AI Travel Assistant Chatbot (floating widget) ===== -->
+    <div id="ai-chat-widget">
+
+        <button type="button" id="ai-chat-toggle-btn" aria-label="Open travel assistant chat">
+            <i class="fa-solid fa-comment-dots ai-chat-icon-open"></i>
+            <i class="fa-solid fa-xmark ai-chat-icon-close"></i>
+        </button>
+
+        <div id="ai-chat-panel">
+
+            <div class="ai-chat-header">
+                <div>
+                    <div class="ai-chat-header-title">DreamStay Assistant</div>
+                    <div class="ai-chat-header-subtitle">Ask about this stay or your trip</div>
+                </div>
+                <button type="button" id="ai-chat-close-btn" aria-label="Close chat">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="ai-chat-messages"></div>
+
+            <form id="ai-chat-form">
+                <input
+                    type="text"
+                    id="ai-chat-input"
+                    placeholder="Type a message..."
+                    autocomplete="off"
+                    maxlength="1000">
+                <button type="submit" id="ai-chat-send-btn" aria-label="Send message">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+
+    <%- include("../includes/footer") %>
+
+    <!-- Bootstrap JS -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous">
+    </script>
+
+    <!-- MapLibre JS -->
+    <script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+
+    <!-- Custom JS -->
+    <script src="/js/script.js"></script>
+    <script src="/js/map.js"></script>
+    <script src="/js/locationPicker.js"></script>
+    <script src="/js/booking.js"></script>
+    <script src="/js/payment.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="/js/search.js"></script>
+    <script src="/js/navbar.js"></script>
+    <script src="/js/aiChatWidget.js"></script>
+</body>
+</html>

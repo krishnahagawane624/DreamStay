@@ -1,0 +1,306 @@
+<% layout("/layouts/boilerplate") %>
+
+<!-- =========================================
+            RECOMMENDED LISTINGS
+========================================= -->
+
+<% if (typeof recommendedListings !== "undefined" && recommendedListings.length > 0) { %>
+
+<div class="mb-5">
+
+    <h4 class="fw-bold mb-4">
+        <i class="fa-solid fa-wand-magic-sparkles text-warning"></i>
+        Recommended For You
+    </h4>
+
+    <div class="reco-carousel-wrap">
+
+        <button type="button" class="reco-nav-btn reco-nav-prev" id="reco-prev-btn" aria-label="Previous">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <div class="reco-carousel-track" id="reco-carousel-track">
+
+            <% recommendedListings.forEach((listing, i)=>{ %>
+
+            <div class="reco-card" data-index="<%= i %>">
+
+                <a href="/listings/<%= listing._id %>" class="reco-card-link">
+
+                    <div class="reco-card-image">
+                        <img src="<%= listing.image.url %>" alt="<%= listing.title %>">
+                    </div>
+
+                    <div class="reco-card-body">
+                        <h5><%= listing.title %></h5>
+                        <p class="reco-card-location">📍 <%= listing.location %>, <%= listing.country %></p>
+                        <div class="reco-card-price">
+                            ₹<%= listing.price.toLocaleString("en-IN") %>
+                            <span>/ night</span>
+                        </div>
+                    </div>
+
+                </a>
+
+            </div>
+
+            <% }) %>
+
+        </div>
+
+        <button type="button" class="reco-nav-btn reco-nav-next" id="reco-next-btn" aria-label="Next">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+    </div>
+
+    <div class="reco-dots" id="reco-dots">
+        <% recommendedListings.forEach((listing, i)=>{ %>
+            <span class="reco-dot" data-index="<%= i %>"></span>
+        <% }) %>
+    </div>
+
+</div>
+
+<script src="/js/recoCarousel.js"></script>
+
+<hr class="mb-5">
+
+<% } %>
+
+<!-- =========================================
+               ALL LISTINGS
+========================================= -->
+
+<div class="mb-4">
+    <h2 class="fw-bold">Find Your Next Stay</h2>
+</div>
+
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4">
+
+<% allListings.forEach((listing)=>{ %>
+
+<div class="col">
+
+    <div class="card listing-card shadow-sm border-0 h-100">
+
+        <!-- ===========================
+                IMAGE SECTION
+        ============================ -->
+
+        <div class="image-container">
+
+            <a href="/listings/<%= listing._id %>" class="listing-link">
+                <img src="<%= listing.image.url %>" class="card-img-top listing-img" alt="<%= listing.title %>">
+            </a>
+
+            <!-- ===========================
+                    RATING BADGE
+            ============================ -->
+
+            <div class="rating-badge">
+
+                <% if(listing.averageRating && listing.averageRating >= 4.8 && listing.reviewCount >= 5){ %>
+
+                    🏆 Guest Favorite
+                    <br>
+                    ⭐ <%= listing.averageRating %> (<%= listing.reviewCount %>)
+
+                <% } else if(listing.averageRating){ %>
+
+                    ⭐ <%= listing.averageRating %> (<%= listing.reviewCount %>)
+
+                <% } else { %>
+
+                    🆕 New
+
+                <% } %>
+
+            </div>
+
+            <!-- ===========================
+                    WISHLIST
+            ============================ -->
+
+            <% if(currUser){ %>
+
+                <% if(wishlist.includes(listing._id.toString())){ %>
+
+                    <form action="/wishlist/<%= listing._id %>?_method=DELETE" method="POST">
+                        <button type="submit" class="wishlist-btn">
+                            <i class="fa-solid fa-heart" style="color:#ff385c;"></i>
+                        </button>
+                    </form>
+
+                <% } else { %>
+
+                    <form action="/wishlist/<%= listing._id %>" method="POST">
+                        <button type="submit" class="wishlist-btn">
+                            <i class="fa-regular fa-heart"></i>
+                        </button>
+                    </form>
+
+                <% } %>
+
+            <% } %>
+
+        </div>
+
+        <!-- ===========================
+                CARD BODY
+        ============================ -->
+
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-start">
+
+                <a href="/listings/<%= listing._id %>" class="listing-link text-decoration-none text-dark">
+                    <h5 class="listing-title"><%= listing.title %></h5>
+                </a>
+
+                <!-- ===========================
+                        COMPARE CHECKBOX
+                ============================ -->
+
+                <label class="compare-checkbox-inline">
+                    <input type="checkbox" class="compare-checkbox" value="<%= listing._id %>" data-title="<%= listing.title %>">
+                    <span>Compare</span>
+                </label>
+
+            </div>
+
+            <p class="listing-location">
+                📍 <%= listing.location %>, <%= listing.country %>
+            </p>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+
+                <div>
+                    <span class="price">₹<%= listing.price.toLocaleString("en-IN") %></span>
+                    <span class="night">/ night</span>
+                </div>
+
+                <% if(listing.reviewCount > 0){ %>
+                    <small class="text-muted"><%= listing.reviewCount %> Reviews</small>
+                <% } %>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<% }) %>
+
+</div>
+
+<!-- =========================================
+        FLOATING COMPARE BAR
+========================================= -->
+
+<div id="compareBar" class="compare-bar d-none">
+    <div class="compare-bar-inner">
+        <span id="compareCount">0 selected</span>
+        <div id="compareChips" class="compare-chips"></div>
+        <button id="compareGoBtn" type="button" class="btn btn-dark btn-sm">Compare</button>
+        <button id="compareClearBtn" type="button" class="btn btn-outline-light btn-sm">Clear</button>
+    </div>
+</div>
+
+<script>
+(function () {
+
+    const STORAGE_KEY = "compareListings";
+    const MAX_COMPARE = 4;
+
+    function getSelected() {
+        try {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveSelected(items) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function render() {
+
+        const items = getSelected();
+        const bar = document.getElementById("compareBar");
+        const count = document.getElementById("compareCount");
+        const chips = document.getElementById("compareChips");
+
+        if (items.length === 0) {
+            bar.classList.add("d-none");
+        } else {
+            bar.classList.remove("d-none");
+        }
+
+        count.textContent = items.length + " selected";
+
+        chips.innerHTML = items
+            .map(item => `<span class="compare-chip">${item.title}</span>`)
+            .join("");
+
+        document.querySelectorAll(".compare-checkbox").forEach(cb => {
+            cb.checked = items.some(item => item.id === cb.value);
+        });
+
+    }
+
+    document.querySelectorAll(".compare-checkbox").forEach(cb => {
+
+        cb.addEventListener("change", function () {
+
+            let items = getSelected();
+
+            if (this.checked) {
+
+                if (items.length >= MAX_COMPARE) {
+                    alert("You can compare up to " + MAX_COMPARE + " listings at a time.");
+                    this.checked = false;
+                    return;
+                }
+
+                items.push({ id: this.value, title: this.dataset.title });
+
+            } else {
+
+                items = items.filter(item => item.id !== this.value);
+
+            }
+
+            saveSelected(items);
+            render();
+
+        });
+
+    });
+
+    document.getElementById("compareGoBtn").addEventListener("click", function () {
+
+        const items = getSelected();
+
+        if (items.length === 0) return;
+
+        const ids = items.map(item => item.id).join(",");
+
+        window.location.href = "/listings/compare?ids=" + ids;
+
+    });
+
+    document.getElementById("compareClearBtn").addEventListener("click", function () {
+
+        saveSelected([]);
+        render();
+
+    });
+
+    render();
+
+})();
+</script>

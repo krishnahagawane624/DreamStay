@@ -1,0 +1,104 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-6">
+
+            <div class="card shadow border-0 rounded-4 p-4">
+
+                <div class="text-center mb-4">
+
+                    <h2>Welcome Back 👋</h2>
+
+                    <p class="text-muted">
+                        Login to continue your DreamStay journey.
+                    </p>
+
+                </div>
+
+                <form action="/login" method="POST">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Username
+                        </label>
+
+                        <input
+                            type="text"
+                            name="username"
+                            class="form-control"
+                            placeholder="Enter Username"
+                            required>
+
+                    </div>
+
+                    <div class="mb-4">
+
+                        <label class="form-label">
+                            Password
+                        </label>
+
+                        <input
+                            type="password"
+                            name="password"
+                            class="form-control"
+                            placeholder="Enter Password"
+                            required>
+
+                    </div>
+
+                    <button class="btn btn-dark w-100">
+
+                        Login
+
+                    </button>
+                    <div class="text-center mt-3">
+    <a href="/forgot-password">
+        Forgot Password?
+    </a>
+</div>
+
+                </form>
+
+                <div class="text-center my-4">
+
+                    <span class="text-muted">
+                        OR
+                    </span>
+
+                </div>
+
+                <a
+                    href="/auth/google"
+                    class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2">
+
+                    <img
+                        src="https://developers.google.com/identity/images/g-logo.png"
+                        width="20">
+
+                    Continue with Google
+
+                </a>
+
+                <div class="text-center mt-4">
+
+                    Don't have an account?
+
+                    <a href="/signup">
+
+                        Sign Up
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

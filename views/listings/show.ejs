@@ -1,0 +1,2980 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    /* ==========================================
+       CALENDAR
+    ========================================== */
+
+    .calendar-legend {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 10px;
+        font-size: 0.85rem;
+        color: #555;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .legend-available {
+        background-color: #28a745;
+    }
+
+    .legend-booked {
+        background-color: #dc3545;
+    }
+
+    .flatpickr-day.day-available {
+        border-bottom: 3px solid #28a745;
+    }
+
+    .flatpickr-day.day-booked {
+        border-bottom: 3px solid #dc3545;
+    }
+
+    .flatpickr-day.day-booked.flatpickr-disabled {
+        color: #dc3545;
+        opacity: 0.6;
+    }
+
+    /* ==========================================
+       RATING
+    ========================================== */
+
+    .star-rating {
+        font-size: 1.6rem;
+        display: flex;
+        gap: 6px;
+    }
+
+    .star-rating i {
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.15s ease, transform 0.1s ease;
+    }
+
+    .star-rating i:hover {
+        transform: scale(1.1);
+    }
+
+    .star-rating i.active {
+        color: #ffb400;
+    }
+
+    /* ==========================================
+       IMAGE GALLERY
+    ========================================== */
+
+    .gallery-wrap {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .gallery-track {
+        display: flex;
+        transition: transform 0.35s ease;
+    }
+
+    .gallery-track img {
+        width: 100%;
+        flex-shrink: 0;
+        height: 420px;
+        object-fit: cover;
+        cursor: zoom-in;
+    }
+
+    .gallery-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.85);
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 2;
+    }
+
+    .gallery-nav.prev {
+        left: 16px;
+    }
+
+    .gallery-nav.next {
+        right: 16px;
+    }
+
+    .gallery-dots {
+        position: absolute;
+        bottom: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 6px;
+        z-index: 2;
+    }
+
+    .gallery-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+    }
+
+    .gallery-dot.active {
+        background: #fff;
+        width: 20px;
+        border-radius: 4px;
+    }
+
+    .gallery-caption {
+        min-height: 24px;
+        margin-top: 8px;
+        color: #666;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    /* ==========================================
+       LIGHTBOX
+    ========================================== */
+
+    .lightbox-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.92);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .lightbox-overlay.open {
+        display: flex;
+    }
+
+    .lightbox-overlay img {
+        max-width: 90vw;
+        max-height: 85vh;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
+    .lightbox-close {
+        position: absolute;
+        top: 24px;
+        right: 32px;
+        color: #fff;
+        font-size: 2rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+    }
+
+    .lightbox-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #fff;
+        font-size: 2rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 10px 16px;
+        z-index: 2001;
+    }
+
+    .lightbox-nav.prev {
+        left: 10px;
+    }
+
+    .lightbox-nav.next {
+        right: 10px;
+    }
+
+    /* ==========================================
+       PAYMENT
+    ========================================== */
+
+    #pay-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+</style>
+
+
+<div class="container show-page py-4">
+
+    <!-- ==========================================
+         HERO SECTION
+    ========================================== -->
+
+    <div class="listing-header">
+
+        <div class="d-flex justify-content-between align-items-start flex-wrap">
+
+            <h1 class="listing-name mb-3">
+                <%= listing.title %>
+            </h1>
+
+            <div class="d-flex gap-2">
+
+                <button
+                    id="share-btn"
+                    class="save-btn"
+                    type="button">
+
+                    <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                    Share
+
+                </button>
+
+
+                <button
+                    id="wishlist-btn-header"
+                    class="save-btn js-wishlist-toggle"
+                    type="button"
+                    data-wishlisted="<%= typeof isWishlisted !== 'undefined' && isWishlisted ? 'true' : 'false' %>">
+
+                    <i class="fa-regular fa-heart"></i>
+
+                    <span class="wishlist-label">
+                        Save
+                    </span>
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="d-flex flex-wrap align-items-center gap-3">
+
+            <span class="badge bg-warning text-dark px-3 py-2">
+
+                ⭐
+                <%= averageRating ? averageRating.toFixed(1) : "New" %>
+
+            </span>
+
+
+            <span class="text-muted">
+
+                (<%= reviewCount %> Reviews)
+
+            </span>
+
+
+            <span class="text-muted">
+
+                📍
+                <%= listing.location %>,
+                <%= listing.country %>
+
+            </span>
+
+
+            <% if (reviewCount >= 5 && averageRating >= 4.8) { %>
+
+                <span class="badge bg-success">
+                    Guest Favourite
+                </span>
+
+            <% } %>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================
+         IMAGE GALLERY
+    ========================================== -->
+
+    <% const galleryImages =
+        (listing.images && listing.images.length > 0)
+            ? listing.images
+            : [listing.image];
+    %>
+
+
+    <div class="gallery-wrap">
+
+        <div
+            class="gallery-track"
+            id="gallery-track">
+
+            <% galleryImages.forEach((img, index) => { %>
+
+                <img
+                    src="<%= img && img.url ? img.url : '/images/placeholder.jpg' %>"
+                    alt="<%= listing.title %>"
+                    class="gallery-img"
+                    data-index="<%= index %>">
+
+            <% }) %>
+
+        </div>
+
+
+        <!-- Gallery Wishlist -->
+
+        <button
+            id="wishlist-btn-gallery"
+            class="wishlist-btn js-wishlist-toggle"
+            type="button"
+            data-wishlisted="<%= typeof isWishlisted !== 'undefined' && isWishlisted ? 'true' : 'false' %>"
+            style="position:absolute; top:16px; right:16px; z-index:2;">
+
+            <i class="fa-regular fa-heart"></i>
+
+        </button>
+
+
+        <% if (galleryImages.length > 1) { %>
+
+            <button
+                class="gallery-nav prev"
+                type="button"
+                id="gallery-prev-btn">
+
+                <i class="fa-solid fa-chevron-left"></i>
+
+            </button>
+
+
+            <button
+                class="gallery-nav next"
+                type="button"
+                id="gallery-next-btn">
+
+                <i class="fa-solid fa-chevron-right"></i>
+
+            </button>
+
+
+            <div
+                class="gallery-dots"
+                id="gallery-dots">
+
+                <% for (let i = 0; i < galleryImages.length; i++) { %>
+
+                    <span
+                        class="gallery-dot <%= i === 0 ? 'active' : '' %>"
+                        data-index="<%= i %>">
+                    </span>
+
+                <% } %>
+
+            </div>
+
+        <% } %>
+
+    </div>
+
+
+    <div
+        class="gallery-caption"
+        id="gallery-caption">
+    </div>
+
+
+    <!-- ==========================================
+         LIGHTBOX
+    ========================================== -->
+
+    <div
+        class="lightbox-overlay"
+        id="lightbox-overlay">
+
+        <button
+            class="lightbox-close"
+            id="lightbox-close-btn"
+            type="button">
+
+            <i class="fa-solid fa-xmark"></i>
+
+        </button>
+
+
+        <% if (galleryImages.length > 1) { %>
+
+            <button
+                class="lightbox-nav prev"
+                id="lightbox-prev-btn"
+                type="button">
+
+                <i class="fa-solid fa-chevron-left"></i>
+
+            </button>
+
+
+            <button
+                class="lightbox-nav next"
+                id="lightbox-next-btn"
+                type="button">
+
+                <i class="fa-solid fa-chevron-right"></i>
+
+            </button>
+
+        <% } %>
+
+
+        <img
+            id="lightbox-img"
+            src=""
+            alt="<%= listing.title %>">
+
+    </div>
+
+
+    <script
+        id="gallery-data"
+        type="application/json">
+        <%- JSON.stringify(
+            galleryImages.map(img =>
+                (img && img.url)
+                    ? img.url
+                    : "/images/placeholder.jpg"
+            )
+        ) %>
+    </script>
+
+
+    <!-- ==========================================
+         GALLERY + SHARE + WISHLIST
+    ========================================== -->
+
+    <script>
+        const galleryDataElement =
+            document.getElementById("gallery-data");
+
+        const galleryImages =
+            galleryDataElement
+                ? JSON.parse(galleryDataElement.textContent)
+                : [];
+
+        let currentSlide = 0;
+
+
+        function updateGallery() {
+
+            const track =
+                document.getElementById("gallery-track");
+
+            if (track) {
+
+                track.style.transform =
+                    `translateX(-${currentSlide * 100}%)`;
+
+            }
+
+
+            document
+                .querySelectorAll(
+                    "#gallery-dots .gallery-dot"
+                )
+                .forEach((dot, index) => {
+
+                    dot.classList.toggle(
+                        "active",
+                        index === currentSlide
+                    );
+
+                });
+
+        }
+
+
+        function slideGallery(direction) {
+
+            if (galleryImages.length <= 1) {
+                return;
+            }
+
+            currentSlide =
+                (
+                    currentSlide +
+                    direction +
+                    galleryImages.length
+                ) %
+                galleryImages.length;
+
+            updateGallery();
+
+        }
+
+
+        function goToSlide(index) {
+
+            if (
+                index < 0 ||
+                index >= galleryImages.length
+            ) {
+                return;
+            }
+
+            currentSlide = index;
+
+            updateGallery();
+
+        }
+
+
+        function openLightbox(index) {
+
+            if (
+                !galleryImages[index]
+            ) {
+                return;
+            }
+
+            currentSlide = index;
+
+            const lightboxImg =
+                document.getElementById(
+                    "lightbox-img"
+                );
+
+            const overlay =
+                document.getElementById(
+                    "lightbox-overlay"
+                );
+
+            if (lightboxImg) {
+
+                lightboxImg.src =
+                    galleryImages[index];
+
+            }
+
+            if (overlay) {
+
+                overlay.classList.add("open");
+
+            }
+
+        }
+
+
+        function closeLightbox() {
+
+            const overlay =
+                document.getElementById(
+                    "lightbox-overlay"
+                );
+
+            if (overlay) {
+
+                overlay.classList.remove("open");
+
+            }
+
+        }
+
+
+        function lightboxSlide(direction) {
+
+            if (galleryImages.length <= 1) {
+                return;
+            }
+
+            currentSlide =
+                (
+                    currentSlide +
+                    direction +
+                    galleryImages.length
+                ) %
+                galleryImages.length;
+
+
+            const lightboxImg =
+                document.getElementById(
+                    "lightbox-img"
+                );
+
+            if (lightboxImg) {
+
+                lightboxImg.src =
+                    galleryImages[currentSlide];
+
+            }
+
+            updateGallery();
+
+        }
+
+
+        document
+            .querySelectorAll(".gallery-img")
+            .forEach((img) => {
+
+                img.addEventListener(
+                    "click",
+                    () => {
+
+                        openLightbox(
+                            parseInt(
+                                img.dataset.index,
+                                10
+                            )
+                        );
+
+                    }
+                );
+
+            });
+
+
+        document
+            .querySelectorAll(
+                "#gallery-dots .gallery-dot"
+            )
+            .forEach((dot) => {
+
+                dot.addEventListener(
+                    "click",
+                    () => {
+
+                        goToSlide(
+                            parseInt(
+                                dot.dataset.index,
+                                10
+                            )
+                        );
+
+                    }
+                );
+
+            });
+
+
+        const galleryPrevBtn =
+            document.getElementById(
+                "gallery-prev-btn"
+            );
+
+        const galleryNextBtn =
+            document.getElementById(
+                "gallery-next-btn"
+            );
+
+
+        if (galleryPrevBtn) {
+
+            galleryPrevBtn.addEventListener(
+                "click",
+                () => slideGallery(-1)
+            );
+
+        }
+
+
+        if (galleryNextBtn) {
+
+            galleryNextBtn.addEventListener(
+                "click",
+                () => slideGallery(1)
+            );
+
+        }
+
+
+        const lightboxCloseBtn =
+            document.getElementById(
+                "lightbox-close-btn"
+            );
+
+
+        if (lightboxCloseBtn) {
+
+            lightboxCloseBtn.addEventListener(
+                "click",
+                closeLightbox
+            );
+
+        }
+
+
+        const lightboxPrevBtn =
+            document.getElementById(
+                "lightbox-prev-btn"
+            );
+
+        const lightboxNextBtn =
+            document.getElementById(
+                "lightbox-next-btn"
+            );
+
+
+        if (lightboxPrevBtn) {
+
+            lightboxPrevBtn.addEventListener(
+                "click",
+                () => lightboxSlide(-1)
+            );
+
+        }
+
+
+        if (lightboxNextBtn) {
+
+            lightboxNextBtn.addEventListener(
+                "click",
+                () => lightboxSlide(1)
+            );
+
+        }
+
+
+        const lightboxOverlay =
+            document.getElementById(
+                "lightbox-overlay"
+            );
+
+
+        if (lightboxOverlay) {
+
+            lightboxOverlay.addEventListener(
+                "click",
+                function (event) {
+
+                    if (
+                        event.target ===
+                        lightboxOverlay
+                    ) {
+
+                        closeLightbox();
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        document.addEventListener(
+            "keydown",
+            function (event) {
+
+                const overlay =
+                    document.getElementById(
+                        "lightbox-overlay"
+                    );
+
+                if (
+                    !overlay ||
+                    !overlay.classList.contains("open")
+                ) {
+                    return;
+                }
+
+
+                if (event.key === "Escape") {
+
+                    closeLightbox();
+
+                }
+
+
+                if (event.key === "ArrowLeft") {
+
+                    lightboxSlide(-1);
+
+                }
+
+
+                if (event.key === "ArrowRight") {
+
+                    lightboxSlide(1);
+
+                }
+
+            }
+        );
+
+
+        /* ==========================================
+           SHARE
+        ========================================== */
+
+        const shareBtn =
+            document.getElementById(
+                "share-btn"
+            );
+
+
+        if (shareBtn) {
+
+            shareBtn.addEventListener(
+                "click",
+                async function () {
+
+                    const shareData = {
+
+                        title:
+                            document.title,
+
+                        text:
+                            "Check out this listing on DreamStay!",
+
+                        url:
+                            window.location.href
+
+                    };
+
+
+                    try {
+
+                        if (
+                            navigator.share
+                        ) {
+
+                            await navigator.share(
+                                shareData
+                            );
+
+                        } else {
+
+                            await navigator.clipboard.writeText(
+                                window.location.href
+                            );
+
+
+                            const originalHTML =
+                                shareBtn.innerHTML;
+
+
+                            shareBtn.innerHTML =
+                                '<i class="fa-solid fa-check"></i> Link copied!';
+
+
+                            setTimeout(
+                                () => {
+
+                                    shareBtn.innerHTML =
+                                        originalHTML;
+
+                                },
+                                2000
+                            );
+
+                        }
+
+                    } catch (error) {
+
+                        if (
+                            error.name !==
+                            "AbortError"
+                        ) {
+
+                            console.error(
+                                "Share failed:",
+                                error
+                            );
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        /* ==========================================
+           WISHLIST
+        ========================================== */
+
+        const wishlistButtons =
+            document.querySelectorAll(
+                ".js-wishlist-toggle"
+            );
+
+
+        wishlistButtons.forEach(
+            (btn) => {
+
+                let wishlisted =
+                    btn.dataset.wishlisted ===
+                    "true";
+
+
+                paintWishlistBtn(
+                    btn,
+                    wishlisted
+                );
+
+
+                btn.addEventListener(
+                    "click",
+                    async function () {
+
+                        wishlisted =
+                            !wishlisted;
+
+
+                        paintWishlistBtn(
+                            btn,
+                            wishlisted
+                        );
+
+
+                        btn.classList.add(
+                            "pulse"
+                        );
+
+
+                        setTimeout(
+                            () => {
+
+                                btn.classList.remove(
+                                    "pulse"
+                                );
+
+                            },
+                            300
+                        );
+
+
+                        wishlistButtons.forEach(
+                            (other) => {
+
+                                paintWishlistBtn(
+                                    other,
+                                    wishlisted
+                                );
+
+                            }
+                        );
+
+
+                        try {
+
+                            const response =
+                                await fetch(
+                                    "/wishlist/toggle/<%= listing._id %>",
+                                    {
+                                        method: "POST",
+
+                                        headers: {
+                                            "Content-Type":
+                                                "application/json"
+                                        }
+                                    }
+                                );
+
+
+                            if (!response.ok) {
+
+                                throw new Error(
+                                    "Wishlist request failed."
+                                );
+
+                            }
+
+                        } catch (error) {
+
+                            console.error(
+                                "Wishlist toggle failed:",
+                                error
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+        function paintWishlistBtn(
+            btn,
+            isWishlisted
+        ) {
+
+            const icon =
+                btn.querySelector("i");
+
+            if (!icon) {
+                return;
+            }
+
+
+            if (isWishlisted) {
+
+                icon.classList.remove(
+                    "fa-regular"
+                );
+
+                icon.classList.add(
+                    "fa-solid"
+                );
+
+                btn.classList.add(
+                    "is-wishlisted"
+                );
+
+            } else {
+
+                icon.classList.remove(
+                    "fa-solid"
+                );
+
+                icon.classList.add(
+                    "fa-regular"
+                );
+
+                btn.classList.remove(
+                    "is-wishlisted"
+                );
+
+            }
+
+        }
+
+
+        /* ==========================================
+           RATING BAR
+        ========================================== */
+
+        document
+            .querySelectorAll(
+                ".rating-bar-fill"
+            )
+            .forEach((bar) => {
+
+                const percentage =
+                    Number(
+                        bar.dataset.pct || 0
+                    );
+
+                bar.style.width =
+                    percentage + "%";
+
+            });
+
+    </script>
+
+
+    <!-- ==========================================
+         MAIN SECTION
+    ========================================== -->
+
+    <div class="row mt-5">
+
+        <!-- ======================================
+             LEFT SIDE
+        ======================================= -->
+
+        <div class="col-lg-8">
+
+            <!-- HOST -->
+
+            <div class="host-card">
+
+                <div class="host-avatar">
+
+                    <img
+                        src="https://i.pravatar.cc/150?u=<%= listing.owner ? listing.owner._id : 'guest' %>"
+                        alt="Host">
+
+                </div>
+
+
+                <div class="host-info">
+
+                    <h3>
+
+                        Hosted by
+
+                        <%= listing.owner
+                            ? listing.owner.username
+                            : "DreamStay Host" %>
+
+                    </h3>
+
+
+                    <%
+                        const hostIsSuperhost =
+                            hostListingCount >= 3 &&
+                            averageRating >= 4.8;
+                    %>
+
+
+                    <% if (hostIsSuperhost) { %>
+
+                        <span class="host-badge">
+                            ⭐ Super Host
+                        </span>
+
+                    <% } %>
+
+
+                    <% if (
+                        listing.owner &&
+                        listing.owner._id
+                    ) { %>
+
+                        <span class="host-joined text-muted">
+
+                            Joined in
+
+                            <%= listing.owner._id
+                                .getTimestamp()
+                                .getFullYear() %>
+
+                        </span>
+
+                    <% } %>
+
+
+                    <div class="host-stats">
+
+                        <div>
+
+                            <strong>
+                                <%= hostListingCount || 0 %>
+                            </strong>
+
+                            <p>Listings</p>
+
+                        </div>
+
+
+                        <div>
+
+                            <strong>
+                                98%
+                            </strong>
+
+                            <p>
+                                Response Rate
+                            </p>
+
+                        </div>
+
+
+                        <div>
+
+                            <strong>
+                                1 hr
+                            </strong>
+
+                            <p>
+                                Response Time
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <p class="mt-3">
+
+                        Experienced host dedicated
+                        to making every stay memorable
+                        and comfortable.
+
+                    </p>
+
+
+                    <% if (
+                        currUser &&
+                        listing.owner &&
+                        !listing.owner._id.equals(
+                            currUser._id
+                        )
+                    ) { %>
+
+                        <a
+                            href="/chat/start/<%= listing._id %>"
+                            class="btn btn-dark btn-sm mt-2">
+
+                            <i class="fa-solid fa-comment-dots"></i>
+
+                            Message Host
+
+                        </a>
+
+                    <% } %>
+
+                </div>
+
+            </div>
+
+
+            <hr class="my-5">
+
+
+            <!-- ABOUT -->
+
+            <section class="about-section">
+
+                <h3>
+                    About this place
+                </h3>
+
+                <p>
+                    <%= listing.description %>
+                </p>
+
+            </section>
+
+
+            <hr class="my-5">
+
+
+            <!-- AMENITIES -->
+
+            <section class="amenities-section">
+
+                <h3>
+                    What this place offers
+                </h3>
+
+                <% if (selectedAmenities && selectedAmenities.length > 0) { %>
+
+                <div class="amenities-grid mt-4">
+
+                    <% for (let amenity of selectedAmenities) { %>
+
+                        <div class="amenity">
+                            <i class="<%= amenity.icon %>"></i>
+                            <%= amenity.label %>
+                        </div>
+
+                    <% } %>
+
+                </div>
+
+                <% } else { %>
+
+                    <p class="text-muted mt-3">
+                        The host hasn't listed any amenities for this place yet.
+                    </p>
+
+                <% } %>
+
+            </section>
+
+
+            <hr class="my-5">
+
+        </div>
+
+
+        <!-- ======================================
+             RIGHT SIDE
+        ======================================= -->
+
+        <div class="col-lg-4">
+
+            <!-- BOOKING CARD -->
+
+            <div class="booking-card">
+
+                <h2 class="booking-price">
+
+                    ₹<%= listing.price.toLocaleString("en-IN") %>
+
+                    <span>
+                        / night
+                    </span>
+
+                </h2>
+
+
+                <div class="booking-rating">
+
+                    ⭐
+                    <%= averageRating
+                        ? averageRating.toFixed(1)
+                        : "New" %>
+
+                    ·
+
+                    <%= reviewCount %>
+                    Reviews
+
+                </div>
+
+
+                <div class="booking-trending">
+
+                    🎉 You're just one booking away
+                    from becoming our
+
+                    <strong>
+                        <%= bookingsThisMonth + 1 %>th guest
+                    </strong>
+
+                    this month!
+
+                </div>
+
+
+                <form
+                    id="booking-form"
+                    action="/listings/<%= listing._id %>/bookings"
+                    method="POST">
+
+
+                    <!-- CALENDAR LEGEND -->
+
+                    <div class="calendar-legend">
+
+                        <span class="legend-item">
+
+                            <span
+                                class="legend-dot legend-available">
+                            </span>
+
+                            Available
+
+                        </span>
+
+
+                        <span class="legend-item">
+
+                            <span
+                                class="legend-dot legend-booked">
+                            </span>
+
+                            Booked
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- DATES -->
+
+                    <div class="booking-dates">
+
+                        <div>
+
+                            <label>
+                                CHECK-IN
+                            </label>
+
+
+                            <input
+                                type="text"
+                                id="checkin-date"
+                                class="booking-date form-control"
+                                placeholder="Select date"
+                                readonly>
+
+
+                            <input
+                                type="hidden"
+                                id="hidden-checkin"
+                                name="booking[checkIn]">
+
+                        </div>
+
+
+                        <div>
+
+                            <label>
+                                CHECK-OUT
+                            </label>
+
+
+                            <input
+                                type="text"
+                                id="checkout-date"
+                                class="booking-date form-control"
+                                placeholder="Select date"
+                                readonly>
+
+
+                            <input
+                                type="hidden"
+                                id="hidden-checkout"
+                                name="booking[checkOut]">
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- GUESTS -->
+
+                    <div class="guest-box">
+
+                        <label>
+                            GUESTS
+                        </label>
+
+
+                        <select
+                            id="guest-count"
+                            class="guest-select"
+                            name="booking[guests]">
+
+                            <% for (
+                                let i = 1;
+                                i <= 10;
+                                i++
+                            ) { %>
+
+                                <option value="<%= i %>">
+
+                                    <%= i %>
+
+                                    Guest<%= i > 1
+                                        ? "s"
+                                        : "" %>
+
+                                </option>
+
+                            <% } %>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- PAYMENT HIDDEN FIELDS -->
+
+                    <input
+                        type="hidden"
+                        id="payment-id"
+                        name="paymentId">
+
+
+                    <input
+                        type="hidden"
+                        id="order-id"
+                        name="orderId">
+
+
+                    <input
+                        type="hidden"
+                        id="hidden-service-fee"
+                        name="booking[serviceFee]">
+
+
+                    <input
+                        type="hidden"
+                        id="hidden-gst-rate"
+                        name="booking[gstRate]">
+
+
+                    <input
+                        type="hidden"
+                        id="hidden-gst-amount"
+                        name="booking[gstAmount]">
+
+
+                    <input
+                        type="hidden"
+                        id="hidden-grand-total"
+                        name="booking[grandTotal]">
+
+
+                    <!-- RESERVE BUTTON -->
+
+                    <button
+                        type="button"
+                        id="pay-btn"
+                        class="reserve-btn">
+
+                        Reserve
+
+                    </button>
+
+                </form>
+
+
+                <p class="booking-note">
+
+                    You won't be charged yet
+
+                </p>
+
+
+                <!-- PRICE BREAKDOWN -->
+
+                <div class="price-breakdown">
+
+                    <div class="price-row">
+
+                        <span>
+
+                            ₹<%= listing.price.toLocaleString("en-IN") %>
+
+                            ×
+
+                            <span id="night-count">
+                                0
+                            </span>
+
+                            nights
+
+                        </span>
+
+
+                        <span id="subtotal">
+                            ₹0
+                        </span>
+
+                    </div>
+
+
+                    <div class="price-row">
+
+                        <span>
+                            Service Fee
+                        </span>
+
+                        <span id="service-fee">
+                            ₹0
+                        </span>
+
+                    </div>
+
+
+                    <div class="price-row">
+
+                        <span>
+
+                            GST
+                            (
+                            <span id="gst-rate-label">
+                                0%
+                            </span>
+                            )
+
+                        </span>
+
+
+                        <span id="gst-amount">
+                            ₹0
+                        </span>
+
+                    </div>
+
+
+                    <hr>
+
+
+                    <div class="price-total d-flex justify-content-between">
+
+                        <span>
+                            Total
+                        </span>
+
+                        <span id="total-price">
+                            ₹0
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================
+         NEARBY ATTRACTIONS
+    ========================================== -->
+
+    <section>
+
+        <h3>
+            Explore Nearby
+        </h3>
+
+
+        <div class="nearby-grid mt-4">
+
+            <div class="nearby-card">
+
+                🏖️
+                Beach
+
+                <span>
+                    2 km
+                </span>
+
+            </div>
+
+
+            <div class="nearby-card">
+
+                🍽️
+                Restaurants
+
+                <span>
+                    500 m
+                </span>
+
+            </div>
+
+
+            <div class="nearby-card">
+
+                ☕
+                Cafés
+
+                <span>
+                    300 m
+                </span>
+
+            </div>
+
+
+            <div class="nearby-card">
+
+                🛍️
+                Market
+
+                <span>
+                    700 m
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <hr class="my-5">
+
+
+    <!-- ==========================================
+         MAP
+    ========================================== -->
+
+    <section class="map-section mt-5">
+
+        <h3>
+            Where you'll be
+        </h3>
+
+
+        <div
+            id="map"
+            data-coordinates='<%- JSON.stringify(
+                listing.geometry.coordinates
+            ) %>'
+            data-title="<%= listing.title %>"
+            data-location="<%= listing.location %>, <%= listing.country %>"
+            data-price="₹<%= listing.price.toLocaleString('en-IN') %> / night">
+        </div>
+
+        <p class="map-approx-note text-muted">
+            Exact location provided after booking.
+        </p>
+    </section>
+
+
+    <hr class="my-5">
+
+
+    <!-- ==========================================
+         REVIEWS
+    ========================================== -->
+
+    <section class="reviews-section">
+
+        <h3>
+
+            ⭐
+
+            <%= averageRating
+                ? averageRating.toFixed(1)
+                : "New" %>
+
+            ·
+
+            <%= reviewCount %>
+            Reviews
+
+        </h3>
+
+
+        <%
+            const ratingCounts =
+                [0, 0, 0, 0, 0];
+
+            (listing.reviews || []).forEach(
+                review => {
+
+                    if (
+                        review.rating >= 1 &&
+                        review.rating <= 5
+                    ) {
+
+                        ratingCounts[
+                            review.rating - 1
+                        ]++;
+
+                    }
+
+                }
+            );
+
+
+            const totalRatings =
+                ratingCounts.reduce(
+                    (a, b) => a + b,
+                    0
+                );
+        %>
+
+
+        <% if (totalRatings > 0) { %>
+
+            <div class="rating-summary mb-4">
+
+                <% for (
+                    let star = 5;
+                    star >= 1;
+                    star--
+                ) { %>
+
+                    <%
+                        const count =
+                            ratingCounts[star - 1];
+
+                        const pct =
+                            totalRatings
+                                ? Math.round(
+                                    (
+                                        count /
+                                        totalRatings
+                                    ) * 100
+                                )
+                                : 0;
+                    %>
+
+
+                    <div class="rating-bar-row">
+
+                        <span class="rating-bar-label">
+
+                            <%= star %> ★
+
+                        </span>
+
+
+                        <div class="rating-bar-track">
+
+                            <div
+                                class="rating-bar-fill"
+                                data-pct="<%= pct %>">
+                            </div>
+
+                        </div>
+
+
+                        <span class="rating-bar-count">
+
+                            <%= count %>
+
+                        </span>
+
+                    </div>
+
+                <% } %>
+
+            </div>
+
+        <% } %>
+
+
+        <!-- REVIEW FORM -->
+
+        <% if (currUser && hasBookedListing) { %>
+
+            <div class="review-form mt-4 mb-5">
+
+                <form
+                    action="/listings/<%= listing._id %>/reviews"
+                    method="POST">
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Rating
+                        </label>
+
+
+                        <div
+                            class="star-rating"
+                            id="star-rating">
+
+                            <i
+                                class="fa-solid fa-star"
+                                data-value="1">
+                            </i>
+
+                            <i
+                                class="fa-solid fa-star"
+                                data-value="2">
+                            </i>
+
+                            <i
+                                class="fa-solid fa-star"
+                                data-value="3">
+                            </i>
+
+                            <i
+                                class="fa-solid fa-star"
+                                data-value="4">
+                            </i>
+
+                            <i
+                                class="fa-solid fa-star"
+                                data-value="5">
+                            </i>
+
+                        </div>
+
+
+                        <input
+                            type="hidden"
+                            id="rating-value"
+                            name="review[rating]"
+                            value="5"
+                            required>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Write Review
+                        </label>
+
+
+                        <textarea
+                            class="form-control"
+                            rows="5"
+                            required
+                            name="review[comment]"></textarea>
+
+                    </div>
+
+
+                    <button
+                        class="reserve-btn"
+                        type="submit">
+
+                        Submit Review
+
+                    </button>
+
+                </form>
+
+            </div>
+
+
+        <% } else if (currUser) { %>
+
+            <div class="alert alert-light mt-4 mb-5">
+
+                <i class="fa-solid fa-circle-info me-2"></i>
+
+                Only guests with a confirmed booking
+                for this listing can leave a review.
+
+            </div>
+
+        <% } %>
+
+
+        <!-- NO REVIEWS -->
+
+        <% if (
+            !listing.reviews ||
+            listing.reviews.length === 0
+        ) { %>
+
+            <div class="alert alert-light">
+
+                No reviews yet.
+
+            </div>
+
+        <% } %>
+
+
+        <!-- EXISTING REVIEWS -->
+
+        <% for (
+            let review of
+            (listing.reviews || [])
+        ) { %>
+
+            <div class="review-card">
+
+                <div class="review-top">
+
+                    <div>
+
+                        <h5>
+
+                            <%= review.author
+                                ? review.author.username
+                                : "Former Guest" %>
+
+
+                            <% if (
+                                review.verifiedStay
+                            ) { %>
+
+                                <span
+                                    class="badge bg-success"
+                                    style="font-size:0.65rem; vertical-align:middle;">
+
+                                    <i
+                                        class="fa-solid fa-circle-check">
+                                    </i>
+
+                                    Verified Stay
+
+                                </span>
+
+                            <% } %>
+
+                        </h5>
+
+
+                        <small class="text-muted">
+                            Guest
+                        </small>
+
+                    </div>
+
+
+                    <strong>
+
+                        ⭐
+                        <%= review.rating %>
+
+                    </strong>
+
+                </div>
+
+
+                <p>
+                    <%= review.comment %>
+                </p>
+
+
+                <% if (
+                    currUser &&
+                    review.author &&
+                    review.author._id.equals(
+                        currUser._id
+                    )
+                ) { %>
+
+                    <form
+                        action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
+                        method="POST">
+
+                        <button
+                            class="delete-review-btn"
+                            type="submit">
+
+                            Delete Review
+
+                        </button>
+
+                    </form>
+
+                <% } %>
+
+            </div>
+
+        <% } %>
+
+    </section>
+
+
+    <hr class="my-5">
+
+
+    <!-- ==========================================
+         OWNER CONTROLS
+    ========================================== -->
+
+    <% if (
+        currUser &&
+        listing.owner &&
+        listing.owner._id.equals(
+            currUser._id
+        )
+    ) { %>
+
+
+        <% if (
+            listing.fraudWarning &&
+            listing.fraudWarning.flagged
+        ) { %>
+
+            <div class="fraud-warning-banner">
+
+                <i
+                    class="fa-solid fa-triangle-exclamation">
+                </i>
+
+
+                <div>
+
+                    <strong>
+                        Possible duplicate listing detected
+                    </strong>
+
+                    <p>
+                        <%= listing.fraudWarning.message %>
+                    </p>
+
+                </div>
+
+            </div>
+
+        <% } %>
+
+
+        <div class="listing-actions">
+
+            <a
+                href="/listings/<%= listing._id %>/edit"
+                class="edit-action-btn">
+
+                <i class="fa-solid fa-pen"></i>
+
+                Edit Listing
+
+            </a>
+
+
+            <form
+                action="/listings/<%= listing._id %>?_method=DELETE"
+                method="POST">
+
+                <button
+                    type="submit"
+                    class="delete-action-btn">
+
+                    <i class="fa-solid fa-trash"></i>
+
+                    Delete Listing
+
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <hr class="my-5">
+
+    <% } %>
+
+
+    <!-- ==========================================
+         SIMILAR LISTINGS
+    ========================================== -->
+
+    <section class="similar-listings">
+
+        <h2>
+            You may also like
+        </h2>
+
+
+        <div class="row mt-4">
+
+            <% for (
+                let item of
+                (similarListings || [])
+            ) { %>
+
+                <div class="col-lg-4 col-md-6 mb-4">
+
+                    <a
+                        href="/listings/<%= item._id %>"
+                        class="listing-link">
+
+
+                        <div class="listing-card">
+
+                            <div class="image-container">
+
+                                <img
+                                    src="<%= item.image && item.image.url
+                                        ? item.image.url
+                                        : '/images/placeholder.jpg' %>"
+                                    class="listing-img"
+                                    alt="<%= item.title %>">
+
+                            </div>
+
+
+                            <div class="card-body">
+
+                                <h5 class="listing-title">
+
+                                    <%= item.title %>
+
+                                </h5>
+
+
+                                <p class="listing-location">
+
+                                    📍
+                                    <%= item.location %>
+
+                                </p>
+
+
+                                <div class="d-flex justify-content-between">
+
+                                    <span class="price">
+
+                                        ₹<%= item.price.toLocaleString("en-IN") %>
+
+                                    </span>
+
+
+                                    <span class="night">
+
+                                        / night
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </a>
+
+                </div>
+
+            <% } %>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- ==========================================
+     PAGE DATA
+========================================== -->
+
+<script
+    id="page-data"
+    type="application/json">
+{
+    "bookings": <%- JSON.stringify(bookings || []) %>,
+
+    "pricePerNight": <%= listing.price %>,
+
+    "razorpayKey": "<%= razorpayKey || '' %>",
+
+    "listingId": "<%= listing._id %>",
+
+    "isLoggedIn": <%= currUser ? "true" : "false" %>,
+
+    "username": "<%= currUser ? currUser.username : '' %>",
+
+    "email": "<%= currUser ? currUser.email : '' %>"
+}
+</script>
+
+
+<!-- ==========================================
+     CURRENT LISTING FOR AI ASSISTANT
+========================================== -->
+
+<script>
+    window.CURRENT_LISTING_ID =
+        "<%= listing._id %>";
+</script>
+
+
+<!-- ==========================================
+     GALLERY CAPTIONS DATA
+========================================== -->
+
+<script
+    id="gallery-captions-data"
+    type="application/json">
+    <%- JSON.stringify(
+        galleryImages.map(
+            img =>
+                (img && img.caption)
+                    ? img.caption
+                    : ""
+        )
+    ) %>
+</script>
+
+
+<!-- ==========================================
+     RAZORPAY CHECKOUT
+========================================== -->
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+
+<!-- ==========================================
+     RAZORPAY PAYMENT
+========================================== -->
+
+<script>
+(function () {
+
+    const pageDataElement =
+        document.getElementById("page-data");
+
+    if (!pageDataElement) {
+        console.error("Page data not found.");
+        return;
+    }
+
+    let pageData;
+
+    try {
+        pageData = JSON.parse(
+            pageDataElement.textContent
+        );
+    } catch (error) {
+        console.error(
+            "Unable to parse page data:",
+            error
+        );
+        return;
+    }
+
+    const payBtn =
+        document.getElementById("pay-btn");
+
+    const bookingForm =
+        document.getElementById("booking-form");
+
+    if (!payBtn || !bookingForm) {
+        console.error(
+            "Payment button or booking form not found."
+        );
+        return;
+    }
+
+    payBtn.addEventListener(
+        "click",
+        async function () {
+
+         /* ======================================
+   LOGIN CHECK
+====================================== */
+
+if (!pageData.isLoggedIn) {
+
+    alert(
+        "Please login to book this property."
+    );
+
+    window.location.href =
+        "/login?redirect=" +
+        encodeURIComponent(
+            window.location.pathname +
+            window.location.search
+        );
+
+    return;
+}
+
+
+            /* ======================================
+               GET BOOKING DETAILS
+            ====================================== */
+
+            const checkIn =
+                document.getElementById(
+                    "hidden-checkin"
+                ).value;
+
+            const checkOut =
+                document.getElementById(
+                    "hidden-checkout"
+                ).value;
+
+            const guests =
+                document.getElementById(
+                    "guest-count"
+                ).value;
+
+
+            /* ======================================
+               DATE VALIDATION
+            ====================================== */
+
+            if (!checkIn || !checkOut) {
+
+                alert(
+                    "Please select check-in and check-out dates."
+                );
+
+                return;
+            }
+
+
+            /* ======================================
+               GUEST VALIDATION
+            ====================================== */
+
+            const guestCount =
+                Number(guests);
+
+            if (
+                !Number.isInteger(guestCount) ||
+                guestCount < 1 ||
+                guestCount > 10
+            ) {
+
+                alert(
+                    "Please select between 1 and 10 guests."
+                );
+
+                return;
+            }
+
+
+            /* ======================================
+               GET DISPLAYED TOTAL
+            ====================================== */
+
+            const totalElement =
+                document.getElementById(
+                    "total-price"
+                );
+
+            if (!totalElement) {
+
+                alert(
+                    "Unable to calculate booking amount."
+                );
+
+                return;
+            }
+
+            const totalAmount =
+                Number(
+                    totalElement.textContent
+                        .replace(/[₹,]/g, "")
+                        .trim()
+                );
+
+            if (
+                !Number.isFinite(totalAmount) ||
+                totalAmount <= 0
+            ) {
+
+                alert(
+                    "Invalid booking amount."
+                );
+
+                return;
+            }
+
+
+            /* ======================================
+               DISABLE BUTTON
+            ====================================== */
+
+            payBtn.disabled = true;
+            payBtn.textContent = "Processing...";
+
+
+            try {
+
+                /* ======================================
+                   CREATE RAZORPAY ORDER
+                ====================================== */
+
+                const orderResponse =
+                    await fetch(
+                        "/payment/create-order",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            credentials:
+                                "same-origin",
+
+                            body:
+                                JSON.stringify({
+                                    listingId:
+                                        pageData.listingId,
+
+                                    checkIn:
+                                        checkIn,
+
+                                    checkOut:
+                                        checkOut,
+
+                                    guests:
+                                        guestCount,
+
+                                    amount:
+                                        totalAmount
+                                })
+                        }
+                    );
+
+
+                /* ======================================
+                   READ ORDER RESPONSE SAFELY
+                ====================================== */
+
+                const orderText =
+                    await orderResponse.text();
+
+                let orderData;
+
+                try {
+
+                    orderData =
+                        JSON.parse(orderText);
+
+                } catch (error) {
+
+                    console.error(
+                        "Invalid order response:",
+                        orderText
+                    );
+
+                    throw new Error(
+                        "Unable to start payment. Please login again."
+                    );
+                }
+
+
+                /* ======================================
+                   CHECK ORDER RESPONSE
+                ====================================== */
+
+                if (
+                    !orderResponse.ok ||
+                    !orderData.success
+                ) {
+
+                    throw new Error(
+                        orderData.message ||
+                        "Unable to create payment order."
+                    );
+                }
+
+
+                /* ======================================
+                   RAZORPAY CHECK
+                ====================================== */
+
+                if (
+                    typeof Razorpay ===
+                    "undefined"
+                ) {
+
+                    throw new Error(
+                        "Razorpay checkout failed to load."
+                    );
+                }
+
+
+                /* ======================================
+                   RAZORPAY OPTIONS
+                ====================================== */
+
+                const options = {
+
+                    key:
+                        pageData.razorpayKey,
+
+                    amount:
+                        orderData.amount,
+
+                    currency:
+                        orderData.currency,
+
+                    name:
+                        "DreamStay",
+
+                    description:
+                        "Property Booking",
+
+                    order_id:
+                        orderData.orderId,
+
+
+                    /* ==================================
+                       CUSTOMER DETAILS
+                    ================================== */
+
+                    prefill: {
+
+                        name:
+                            pageData.username ||
+                            "",
+
+                        email:
+                            pageData.email ||
+                            ""
+                    },
+
+
+                    /* ==================================
+                       THEME
+                    ================================== */
+
+                    theme: {
+                        color: "#D85A30"
+                    },
+
+
+                    /* ==================================
+                       PAYMENT SUCCESS
+                    ================================== */
+
+                    handler:
+                        async function (
+                            response
+                        ) {
+
+                            try {
+
+                                const verifyResponse =
+                                    await fetch(
+                                        "/payment/verify",
+                                        {
+                                            method: "POST",
+
+                                            headers: {
+                                                "Content-Type":
+                                                    "application/json"
+                                            },
+
+                                            credentials:
+                                                "same-origin",
+
+                                            body:
+                                                JSON.stringify({
+
+                                                    razorpay_order_id:
+                                                        response.razorpay_order_id,
+
+                                                    razorpay_payment_id:
+                                                        response.razorpay_payment_id,
+
+                                                    razorpay_signature:
+                                                        response.razorpay_signature
+                                                })
+                                        }
+                                    );
+
+
+                                /* ==========================
+                                   READ VERIFY RESPONSE
+                                ========================== */
+
+                                const verifyText =
+                                    await verifyResponse.text();
+
+                                let verifyData;
+
+                                try {
+
+                                    verifyData =
+                                        JSON.parse(
+                                            verifyText
+                                        );
+
+                                } catch (error) {
+
+                                    console.error(
+                                        "Invalid verification response:",
+                                        verifyText
+                                    );
+
+                                    throw new Error(
+                                        "Payment verification returned an invalid response."
+                                    );
+                                }
+
+
+                                /* ==========================
+                                   CHECK VERIFICATION
+                                ========================== */
+
+                                if (
+                                    !verifyResponse.ok ||
+                                    !verifyData.success
+                                ) {
+
+                                    throw new Error(
+                                        verifyData.message ||
+                                        "Payment verification failed."
+                                    );
+                                }
+
+
+                                /* ==================================
+                                   PAYMENT VERIFIED
+                                   BOOKING IS ALREADY CREATED
+                                   BY /payment/verify
+                                ================================== */
+
+                                if (
+                                    verifyData.bookingId
+                                ) {
+
+                                    window.location.href =
+                                        "/bookings/" +
+                                        verifyData.bookingId;
+
+                                    return;
+                                }
+
+
+                                window.location.href =
+                                    "/bookings";
+
+                            } catch (error) {
+
+                                console.error(
+                                    "Payment verification error:",
+                                    error
+                                );
+
+                                alert(
+                                    error.message ||
+                                    "Payment verification failed."
+                                );
+
+                                payBtn.disabled =
+                                    false;
+
+                                payBtn.textContent =
+                                    "Reserve";
+                            }
+                        },
+
+
+                    /* ==================================
+                       PAYMENT MODAL DISMISS
+                    ================================== */
+
+                    modal: {
+
+                        ondismiss:
+                            function () {
+
+                                payBtn.disabled =
+                                    false;
+
+                                payBtn.textContent =
+                                    "Reserve";
+                            }
+                    }
+                };
+
+
+                /* ======================================
+                   CREATE RAZORPAY INSTANCE
+                ====================================== */
+
+                const razorpayCheckout =
+                    new Razorpay(options);
+
+
+                /* ======================================
+                   PAYMENT FAILED
+                ====================================== */
+
+                razorpayCheckout.on(
+                    "payment.failed",
+                    function (response) {
+
+                        console.error(
+                            "Razorpay payment failed:",
+                            response.error
+                        );
+
+                        alert(
+                            response.error &&
+                            response.error.description
+                                ? response.error.description
+                                : "Payment failed."
+                        );
+
+                        payBtn.disabled =
+                            false;
+
+                        payBtn.textContent =
+                            "Reserve";
+                    }
+                );
+
+
+                /* ======================================
+                   OPEN CHECKOUT — ONCE ONLY
+                ====================================== */
+
+                razorpayCheckout.open();
+
+            } catch (error) {
+
+                console.error(
+                    "Payment initialization error:",
+                    error
+                );
+
+                alert(
+                    error.message ||
+                    "Unable to start payment."
+                );
+
+                payBtn.disabled =
+                    false;
+
+                payBtn.textContent =
+                    "Reserve";
+            }
+        }
+    );
+
+})();
+</script>
+
+
+<!-- ==========================================
+     GALLERY CAPTIONS
+========================================== -->
+
+<script>
+(function () {
+
+    const captionsElement =
+        document.getElementById(
+            "gallery-captions-data"
+        );
+
+
+    const captionElement =
+        document.getElementById(
+            "gallery-caption"
+        );
+
+
+    if (
+        !captionsElement ||
+        !captionElement
+    ) {
+
+        return;
+
+    }
+
+
+    let captions = [];
+
+
+    try {
+
+        captions =
+            JSON.parse(
+                captionsElement.textContent
+            );
+
+    } catch (error) {
+
+        console.error(
+            "Unable to parse gallery captions:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    function showCaption(index) {
+
+        captionElement.textContent =
+            captions[index] || "";
+
+    }
+
+
+    showCaption(0);
+
+
+    document
+        .querySelectorAll(
+            "#gallery-dots .gallery-dot"
+        )
+        .forEach(
+            function (dot) {
+
+                dot.addEventListener(
+                    "click",
+                    function () {
+
+                        showCaption(
+                            parseInt(
+                                dot.dataset.index,
+                                10
+                            )
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            ".gallery-img"
+        )
+        .forEach(
+            function (img) {
+
+                img.addEventListener(
+                    "click",
+                    function () {
+
+                        showCaption(
+                            parseInt(
+                                img.dataset.index,
+                                10
+                            )
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    function currentActiveIndex() {
+
+        const activeDot =
+            document.querySelector(
+                "#gallery-dots .gallery-dot.active"
+            );
+
+
+        return activeDot
+            ? parseInt(
+                activeDot.dataset.index,
+                10
+            )
+            : 0;
+
+    }
+
+
+    const galleryPrevBtn =
+        document.getElementById(
+            "gallery-prev-btn"
+        );
+
+
+    if (galleryPrevBtn) {
+
+        galleryPrevBtn.addEventListener(
+            "click",
+            function () {
+
+                setTimeout(
+                    function () {
+
+                        showCaption(
+                            currentActiveIndex()
+                        );
+
+                    },
+                    0
+                );
+
+            }
+        );
+
+    }
+
+
+    const galleryNextBtn =
+        document.getElementById(
+            "gallery-next-btn"
+        );
+
+
+    if (galleryNextBtn) {
+
+        galleryNextBtn.addEventListener(
+            "click",
+            function () {
+
+                setTimeout(
+                    function () {
+
+                        showCaption(
+                            currentActiveIndex()
+                        );
+
+                    },
+                    0
+                );
+
+            }
+        );
+
+    }
+
+})();
+</script>

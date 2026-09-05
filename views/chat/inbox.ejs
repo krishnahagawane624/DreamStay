@@ -1,0 +1,58 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .conv-list-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px; text-decoration: none; color: inherit; border: 1px solid #eee; margin-bottom: 10px; transition: 0.15s; }
+    .conv-list-item:hover { background: #faf8f6; border-color: #ddd; }
+    .conv-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+    .conv-body { flex: 1; min-width: 0; }
+    .conv-name { font-weight: 600; margin-bottom: 2px; }
+    .conv-listing { font-size: 0.78rem; color: #D85A30; margin-bottom: 2px; }
+    .conv-preview { font-size: 0.85rem; color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .conv-unread-badge { background: #D85A30; color: #fff; font-size: 0.72rem; font-weight: 700; border-radius: 50px; padding: 2px 9px; flex-shrink: 0; }
+</style>
+
+<div class="container py-4" style="max-width:700px;">
+
+    <h3 class="fw-bold mb-4">Messages</h3>
+
+    <% if(conversations.length === 0){ %>
+
+        <div class="alert alert-light">No conversations yet. Message a host from any listing page to start one.</div>
+
+    <% } else { %>
+
+        <% for(let conv of conversations){ %>
+
+            <% const other = conv.participants.find(p => !p._id.equals(currUser._id)); %>
+            <% const unread = unreadMap[conv._id.toString()] || 0; %>
+
+            <a href="/chat/<%= conv._id %>" class="conv-list-item">
+
+                <img src="<%= other ? other.profileImage : 'https://ui-avatars.com/api/?name=User' %>" class="conv-avatar">
+
+                <div class="conv-body">
+
+                    <div class="conv-name"><%= other ? other.username : "User" %></div>
+
+                    <% if(conv.listing){ %>
+                        <div class="conv-listing">
+                            <i class="fa-solid fa-house"></i>
+                            <%= conv.listing.title %>
+                        </div>
+                    <% } %>
+
+                    <div class="conv-preview"><%= conv.lastMessage || "No messages yet" %></div>
+
+                </div>
+
+                <% if(unread > 0){ %>
+                    <span class="conv-unread-badge"><%= unread %></span>
+                <% } %>
+
+            </a>
+
+        <% } %>
+
+    <% } %>
+
+</div>

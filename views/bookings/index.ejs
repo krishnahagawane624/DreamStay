@@ -1,0 +1,150 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-4">
+
+    <h2>My Bookings</h2>
+
+    <% if (bookings.length === 0) { %>
+
+        <p>
+            You haven't booked any stays yet.
+            <a href="/listings">Browse listings</a>
+        </p>
+
+    <% } else { %>
+
+        <div class="row mt-4">
+
+            <% for (let booking of bookings) { %>
+
+                <div class="col-md-6 mb-4">
+
+                    <div class="booking-summary-card">
+
+                        <h5>
+                            <%= booking.listing.title %>
+                        </h5>
+
+
+                        <p>
+                            📍
+                            <%= booking.listing.location %>,
+                            <%= booking.listing.country %>
+                        </p>
+
+
+                        <p>
+
+                            <strong>Check-in:</strong>
+                            <%= booking.checkIn.toDateString() %>
+
+                            <br>
+
+                            <strong>Check-out:</strong>
+                            <%= booking.checkOut.toDateString() %>
+
+                            <br>
+
+                            <strong>Guests:</strong>
+                            <%= booking.guests %>
+
+                        </p>
+
+
+                        <!-- ============================= -->
+                        <!-- TOTAL PAID -->
+                        <!-- ============================= -->
+
+                        <p>
+
+                            <strong>Total Paid:</strong>
+
+                            ₹<%= (booking.grandTotal || booking.totalPrice)
+                                .toLocaleString("en-IN") %>
+
+                        </p>
+
+
+                        <!-- ============================= -->
+                        <!-- STATUS -->
+                        <!-- ============================= -->
+
+                        <p>
+
+                            Status:
+
+                            <span class="badge
+                                <%= booking.status === 'confirmed'
+                                    ? 'bg-success'
+                                    : booking.status === 'cancelled'
+                                    ? 'bg-danger'
+                                    : 'bg-secondary' %>">
+
+                                <%= booking.status %>
+
+                            </span>
+
+
+                            <% if (
+                                booking.status === "cancelled" &&
+                                booking.refundStatus !== "Not Applicable"
+                            ) { %>
+
+                                <span class="badge
+                                    <%= booking.refundStatus === 'Processed'
+                                        ? 'bg-success'
+                                        : booking.refundStatus === 'Failed'
+                                        ? 'bg-danger'
+                                        : 'bg-warning text-dark' %>">
+
+                                    Refund:
+                                    <%= booking.refundStatus %>
+
+                                </span>
+
+                            <% } %>
+
+                        </p>
+
+
+                        <!-- ============================= -->
+                        <!-- ACTIONS -->
+                        <!-- ============================= -->
+
+                        <% if (booking.status === "confirmed") { %>
+
+                            <form
+                                action="/bookings/<%= booking._id %>?_method=DELETE"
+                                method="POST"
+                                class="d-inline"
+                            >
+
+                                <button
+                                    class="btn btn-outline-danger btn-sm"
+                                >
+                                    Cancel Booking
+                                </button>
+
+                            </form>
+
+                        <% } %>
+
+
+                        <a
+                            href="/bookings/<%= booking._id %>"
+                            class="btn btn-dark btn-sm"
+                        >
+                            View Details
+                        </a>
+
+                    </div>
+
+                </div>
+
+            <% } %>
+
+        </div>
+
+    <% } %>
+
+</div>

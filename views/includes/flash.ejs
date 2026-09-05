@@ -1,0 +1,37 @@
+<% if(success && success.length){ %>
+
+<div class="container mt-3">
+
+    <div id="success-alert" class="alert alert-success alert-dismissible fade show">
+
+        <%= success %>
+
+        <button
+            class="btn-close"
+            data-bs-dismiss="alert">
+        </button>
+
+    </div>
+
+</div>
+
+<% } %>
+
+<% if(error && error.length){ %>
+
+<div class="container mt-3">
+
+    <div id="error-alert" class="alert alert-danger alert-dismissible fade show">
+
+        <%= error %>
+
+        <button
+            class="btn-close"
+            data-bs-dismiss="alert">
+        </button>
+
+    </div>
+
+</div>
+
+<% } %>

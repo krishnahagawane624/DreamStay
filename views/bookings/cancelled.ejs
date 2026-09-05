@@ -1,0 +1,64 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-4 mb-5">
+
+    <a href="/bookings" class="text-decoration-none text-dark d-inline-block mb-3">
+        <i class="fa-solid fa-arrow-left me-2"></i> Back to My Bookings
+    </a>
+
+    <h2 class="fw-bold mb-4">Cancellation History</h2>
+
+    <% if (cancelledBookings.length === 0) { %>
+
+        <div class="alert alert-light">You have no cancelled bookings.</div>
+
+    <% } else { %>
+
+        <div class="row">
+
+            <% for (let booking of cancelledBookings) { %>
+
+                <div class="col-md-6 mb-4">
+
+                    <div class="booking-summary-card">
+
+                        <h5><%= booking.listing ? booking.listing.title : "Listing removed" %></h5>
+
+                        <% if (booking.listing) { %>
+                            <p>📍 <%= booking.listing.location %>, <%= booking.listing.country %></p>
+                        <% } %>
+
+                        <p>
+                            <strong>Check-in was:</strong> <%= booking.checkIn.toDateString() %><br>
+                            <strong>Check-out was:</strong> <%= booking.checkOut.toDateString() %><br>
+                            <strong>Cancelled on:</strong>
+                            <%= booking.cancelledAt ? booking.cancelledAt.toDateString() : booking.updatedAt.toDateString() %>
+                        </p>
+
+                        <p><strong>Original Total:</strong> ₹<%= (booking.grandTotal || booking.totalPrice).toLocaleString("en-IN") %></p>
+
+                        <p><strong>Policy Applied:</strong> <%= booking.cancellationPolicyApplied || "N/A" %></p>
+
+                        <p>
+                            Refund Status:
+                            <span class="badge <%= booking.refundStatus === 'Processed' ? 'bg-success' : booking.refundStatus === 'Failed' ? 'bg-danger' : booking.refundStatus === 'Pending' ? 'bg-warning text-dark' : 'bg-secondary' %>">
+                                <%= booking.refundStatus %>
+                            </span>
+                            <% if (booking.refundAmount > 0) { %>
+                                <span class="ms-2 fw-bold">₹<%= booking.refundAmount.toLocaleString("en-IN") %> refunded</span>
+                            <% } %>
+                        </p>
+
+                        <a href="/bookings/<%= booking._id %>" class="btn btn-dark btn-sm">View Full Details</a>
+
+                    </div>
+
+                </div>
+
+            <% } %>
+
+        </div>
+
+    <% } %>
+
+</div>

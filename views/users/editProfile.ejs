@@ -1,0 +1,104 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-5" style="max-width:700px;">
+
+<div class="card shadow rounded-4 p-4">
+
+<h2 class="mb-4">
+Edit Profile
+</h2>
+
+<form
+action="/profile?_method=PUT"
+method="POST"
+enctype="multipart/form-data">
+
+<div class="mb-3">
+<label class="form-label">Bio</label>
+
+<div class="mb-3">
+
+<label class="form-label">
+Profile Picture
+</label>
+
+<input
+type="file"
+class="form-control"
+name="profileImage"
+accept="image/*">
+
+</div>
+
+<textarea
+class="form-control"
+rows="3"
+name="user[bio]"
+><%= user.bio %></textarea>
+
+</div>
+
+<div class="mb-3">
+<label class="form-label">Phone</label>
+
+<input
+type="text"
+class="form-control"
+name="user[phone]"
+value="<%= user.phone %>">
+
+</div>
+
+<div class="mb-3">
+<label class="form-label">Address</label>
+
+<input
+type="text"
+class="form-control"
+name="user[address]"
+value="<%= user.address %>">
+
+</div>
+
+<div class="mb-3">
+<label class="form-label">City</label>
+
+<input
+type="text"
+class="form-control"
+name="user[city]"
+value="<%= user.city %>">
+
+</div>
+
+<div class="mb-3">
+<label class="form-label">State</label>
+
+<input
+type="text"
+class="form-control"
+name="user[state]"
+value="<%= user.state %>">
+
+</div>
+
+<div class="mb-3">
+<label class="form-label">Country</label>
+
+<input
+type="text"
+class="form-control"
+name="user[country]"
+value="<%= user.country %>">
+
+</div>
+
+<button class="btn btn-dark w-100">
+Save Changes
+</button>
+
+</form>
+
+</div>
+
+</div>

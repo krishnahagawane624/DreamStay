@@ -1,0 +1,308 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .image-preview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .image-preview-grid img {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+    }
+
+    .upload-dropzone {
+        border: 1.5px dashed #ccc;
+        border-radius: 12px;
+        padding: 28px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .upload-dropzone:hover,
+    .upload-dropzone.dragover {
+        border-color: #ff385c;
+        background-color: #fff5f6;
+    }
+
+    .upload-dropzone p {
+        margin: 0;
+        color: #717171;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="row">
+    <div class="col-8 offset-2">
+
+        <h3>Create a New Listing</h3>
+
+        <form
+            action="/listings"
+            method="POST"
+            enctype="multipart/form-data"
+            novalidate
+            class="needs-validation">
+
+            <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <input
+                    name="listing[title]"
+                    id="title-input"
+                    placeholder="add a title"
+                    type="text"
+                    class="form-control"
+                    required
+                />
+                <div class="valid-feedback">Title looks good!</div>
+            </div>
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <label for="description" class="form-label mb-0">Description</label>
+                    <button type="button" id="ai-generate-btn" class="btn btn-sm btn-outline-dark">
+                        ✨ Generate with AI
+                    </button>
+                </div>
+                <textarea
+                    name="listing[description]"
+                    id="description-input"
+                    class="form-control"
+                    required
+                ></textarea>
+                <div class="invalid-feedback">Please enter a short desrcription</div>
+                <small class="text-muted" id="ai-generate-status"></small>
+            </div>
+
+            <div class="mb-3">
+
+                <label class="form-label">Upload Images (up to 8)</label>
+
+                <div class="upload-dropzone" id="upload-dropzone">
+                    <p>Drag photos here or click to browse</p>
+                    <p>JPEG or PNG · up to 8 photos</p>
+                </div>
+
+                <input
+                    type="file"
+                    name="listing[images]"
+                    id="image-input"
+                    accept="image/png, image/jpeg, image/jpg"
+                    multiple
+                    hidden
+                    required>
+
+                <div class="invalid-feedback">Please add at least one photo</div>
+
+                <div class="image-preview-grid" id="image-preview-grid"></div>
+
+            </div>
+
+            <div class="row">
+                <div class="mb-3 col-md-4">
+                    <label for="price" class="form-label">Price</label>
+                   <input
+                        name="listing[price]"
+                        id="price-input"
+                        placeholder="1800"
+                        class="form-control"
+                        required
+                    />
+                      <div class="invalid-feedback">Price should be valid</div>
+                </div>
+
+                <div class="mb-3 col-md-8">
+                    <label for="country" class="form-label">Country</label>
+                    <input
+                        name="listing[country]"
+                        id="country-input"
+                        placeholder="India"
+                        type="text"
+                        class="form-control"
+                        required
+                    />
+                      <div class="invalid-feedback">Country should be valid </div>
+                </div>
+            </div>
+
+          <div class="mb-3">
+    <label for="category" class="form-label">Category</label>
+
+    <select
+        class="form-select"
+        name="listing[category]"
+        id="category-input"
+        required>
+
+        <option selected disabled>Select Category</option>
+
+        <option value="Beach">🏖 Beach</option>
+
+        <option value="Mountain">⛰ Mountain</option>
+
+        <option value="Camping">🏕 Camping</option>
+
+        <option value="Villa">🏡 Villa</option>
+
+        <option value="Lake">🌊 Lake</option>
+
+        <option value="Forest">🌲 Forest</option>
+
+        <option value="Snow">❄ Snow</option>
+
+        <option value="City">🏙 City</option>
+
+        <option value="Luxury">💎 Luxury</option>
+
+        <option value="Desert">🏜 Desert</option>
+
+        <option value="Heritage">🏰 Heritage</option>
+
+        <option value="Trending">🔥 Trending</option>
+
+    </select>
+
+</div>
+
+            <%- include("../includes/amenityPicker") %>
+
+            <div class="mb-3">
+                <label for="location" class="form-label">Location</label>
+                <input
+                    name="listing[location]"
+                    id="location-input"
+                    placeholder="Pune, Maharashtra"
+                    type="text"
+                    class="form-control"
+                    required
+                />
+           <div class="invalid-feedback">Location should be valid</div>
+            </div>
+
+            <!-- ===== LOCATION PICKER MAP ===== -->
+            <div class="mb-3">
+                <label class="form-label">Or pick exact location on map (optional)</label>
+                <div id="location-picker-map"></div>
+                <small class="text-muted">Click anywhere on the map to auto-fill location & country above</small>
+            </div>
+
+            <input type="hidden" name="listing[geometry][coordinates][0]" id="picked-lng">
+            <input type="hidden" name="listing[geometry][coordinates][1]" id="picked-lat">
+
+            <button class="btn btn-dark add-btn">Add</button>
+
+        </form>
+
+    </div>
+</div>
+
+<script>
+    // ===== Multi-image select + live preview (dropzone wraps the hidden file input) =====
+    (function () {
+        const dropzone = document.getElementById("upload-dropzone");
+        const input = document.getElementById("image-input");
+        const previewGrid = document.getElementById("image-preview-grid");
+        const MAX_FILES = 8;
+
+        function renderPreviews(fileList) {
+            previewGrid.innerHTML = "";
+            Array.from(fileList).slice(0, MAX_FILES).forEach((file) => {
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(file);
+                img.onload = () => URL.revokeObjectURL(img.src);
+                previewGrid.appendChild(img);
+            });
+        }
+
+        dropzone.addEventListener("click", () => input.click());
+
+        input.addEventListener("change", () => renderPreviews(input.files));
+
+        dropzone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropzone.classList.add("dragover");
+        });
+
+        dropzone.addEventListener("dragleave", () => {
+            dropzone.classList.remove("dragover");
+        });
+
+       dropzone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropzone.classList.remove("dragover");
+            if (e.dataTransfer.files?.length) {
+                input.files = e.dataTransfer.files;
+                renderPreviews(input.files);
+            }
+        });
+    })();
+</script>
+
+<script src="/js/amenityPicker.js"></script>
+
+<script>
+    (function () {
+        const generateBtn = document.getElementById("ai-generate-btn");
+        const statusEl = document.getElementById("ai-generate-status");
+        const descriptionInput = document.getElementById("description-input");
+
+        if (!generateBtn) return;
+
+        generateBtn.addEventListener("click", async () => {
+
+            const title = document.getElementById("title-input")?.value.trim();
+            const category = document.getElementById("category-input")?.value;
+            const location = document.getElementById("location-input")?.value.trim();
+            const country = document.getElementById("country-input")?.value.trim();
+            const price = document.getElementById("price-input")?.value.trim();
+            const amenities = document.getElementById("amenity-picker")?.getSelectedAmenityLabels?.() || "";
+
+            if (!title || !location || !country || !price) {
+                statusEl.textContent = "Fill in title, location, country, and price first.";
+                statusEl.className = "text-danger";
+                return;
+            }
+
+            generateBtn.disabled = true;
+            statusEl.textContent = "Generating...";
+            statusEl.className = "text-muted";
+
+            try {
+
+                const res = await fetch("/listings/generate-description", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ title, category, location, country, price, amenities }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || "Generation failed");
+                }
+
+                descriptionInput.value = data.description;
+                statusEl.textContent = "Generated — feel free to edit it.";
+                statusEl.className = "text-success";
+
+            } catch (err) {
+
+                console.error(err);
+                statusEl.textContent = "Couldn't generate a description. Try again.";
+                statusEl.className = "text-danger";
+
+            } finally {
+
+                generateBtn.disabled = false;
+
+            }
+
+        });
+    })();
+</script>

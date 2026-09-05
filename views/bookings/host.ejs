@@ -1,0 +1,448 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container py-4">
+
+    <h2 class="fw-bold mb-4">
+        🏠 Host Dashboard
+    </h2>
+
+    <!-- Dashboard Cards -->
+
+    <div class="row g-4 mb-5">
+
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="dashboard-card text-center p-4">
+                <h6>Total Listings</h6>
+                <h2><%= totalListings %></h2>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="dashboard-card text-center p-4">
+                <h6>Bookings</h6>
+                <h2><%= totalBookings %></h2>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="dashboard-card text-center p-4">
+                <h6>Revenue</h6>
+                <h2>₹<%= totalRevenue.toLocaleString("en-IN") %></h2>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="dashboard-card text-center p-4">
+                <h6>Guests</h6>
+                <h2><%= typeof totalGuests !== "undefined" ? totalGuests : 0 %></h2>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="dashboard-card text-center p-4">
+                <h6>Occupancy</h6>
+                <h2><%= typeof occupancyRate !== "undefined" ? occupancyRate : 0 %>%</h2>
+            </div>
+        </div>
+
+        <div class="col-lg-2 col-md-4 col-6">
+            <div class="dashboard-card text-center p-4">
+                <h6>Rating</h6>
+                <h2>⭐ <%= averageRating.toFixed(1) %></h2>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Charts -->
+
+    <div class="row g-4 mb-5">
+
+        <div class="col-lg-8">
+
+            <div class="dashboard-card p-4">
+
+                <h5 class="mb-4">
+                    📈 Monthly Revenue
+                </h5>
+
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="dashboard-card p-4">
+
+                <h5 class="mb-3">
+                    🏆 Best Performing Listing
+                </h5>
+
+                <% if(typeof bestListing !== "undefined" && bestListing){ %>
+                    <h4 class="fw-bold">
+                        <%= bestListing.listing.title %>
+                    </h4>
+
+                    <hr>
+
+                    <p>
+                        Bookings
+                        <span class="float-end fw-bold">
+                            <%= bestListing.bookings %>
+                        </span>
+                    </p>
+
+                    <p>
+                        Revenue
+                        <span class="float-end fw-bold">
+                            ₹<%= bestListing.revenue.toLocaleString("en-IN") %>
+                        </span>
+                    </p>
+
+                <% } else { %>
+
+                    <p class="text-muted">
+                        No bookings available.
+                    </p>
+
+                <% } %>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Booking Trend + Ratings -->
+
+    <div class="row g-4 mb-5">
+
+        <div class="col-lg-6">
+
+            <div class="dashboard-card p-4">
+
+                <h5 class="mb-4">
+                    📅 Monthly Bookings
+                </h5>
+
+                <div class="chart-container">
+                    <canvas id="bookingChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-6">
+
+            <div class="dashboard-card p-4">
+
+                <h5 class="mb-4">
+                    ⭐ Rating Distribution
+                </h5>
+
+                <div class="chart-container">
+                    <canvas id="ratingChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Most Viewed Property + Top Countries -->
+
+    <div class="row g-4 mb-5">
+
+        <div class="col-lg-6">
+
+            <div class="dashboard-card p-4">
+
+                <h5 class="mb-3">
+                    👁️ Most Viewed Property
+                </h5>
+
+                <% if (typeof mostViewedListing !== "undefined" && mostViewedListing) { %>
+
+                    <h4 class="fw-bold">
+                        <%= mostViewedListing.title %>
+                    </h4>
+
+                    <hr>
+
+                    <p>
+                        Views
+                        <span class="float-end fw-bold">
+                            <%= mostViewedListing.views || 0 %>
+                        </span>
+                    </p>
+
+                    <p>
+                        Location
+                        <span class="float-end fw-bold">
+                            <%= mostViewedListing.location %>, <%= mostViewedListing.country %>
+                        </span>
+                    </p>
+
+                <% } else { %>
+
+                    <p class="text-muted">
+                        No listings yet.
+                    </p>
+
+                <% } %>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-6">
+
+            <div class="dashboard-card p-4">
+
+                <h5 class="mb-3">
+                    🌍 Top Countries
+                </h5>
+
+                <% if (typeof topCountries !== "undefined" && topCountries.length > 0) { %>
+
+                    <% topCountries.forEach(c => { %>
+
+                        <p>
+                            <%= c.country %>
+                            <span class="float-end fw-bold">
+                                <%= c.bookings %> bookings · ₹<%= c.revenue.toLocaleString("en-IN") %>
+                            </span>
+                        </p>
+
+                    <% }) %>
+
+                <% } else { %>
+
+                    <p class="text-muted">
+                        No bookings yet.
+                    </p>
+
+                <% } %>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Recent Bookings -->
+
+    <div class="dashboard-card p-4 best-listing-card">
+        <h4 class="mb-4">
+            Recent Bookings
+        </h4>
+
+        <div class="table-responsive">
+
+            <table class="table align-middle dashboard-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Guest</th>
+
+                        <th>Listing</th>
+
+                        <th>Check-In</th>
+
+                        <th>Check-Out</th>
+
+                        <th>Guests</th>
+
+                        <th>Total</th>
+
+                        <th>Status</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <% bookings.forEach(booking=>{ %>
+
+                    <tr>
+
+                        <td>
+
+                            <strong>
+
+                                <%= booking.user.username %>
+
+                            </strong>
+
+                        </td>
+
+                        <td>
+
+                            <%= booking.listing.title %>
+
+                        </td>
+
+                        <td>
+
+                            <%= booking.checkIn.toDateString() %>
+
+                        </td>
+
+                        <td>
+
+                            <%= booking.checkOut.toDateString() %>
+
+                        </td>
+
+                        <td>
+
+                            <%= booking.guests %>
+
+                        </td>
+
+                        <td>
+
+                            ₹<%= booking.totalPrice.toLocaleString("en-IN") %>
+
+                        </td>
+
+                        <td>
+
+                            <span class="badge <%= booking.status==="confirmed" ? "bg-success":"bg-danger" %>">
+
+                                <%= booking.status %>
+
+                            </span>
+
+                        </td>
+
+                    </tr>
+
+                    <% }) %>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script id="chart-data" type="application/json">
+{
+    "revenue": <%- JSON.stringify(typeof monthlyRevenue !== "undefined" ? monthlyRevenue : []) %>,
+    "bookings": <%- JSON.stringify(typeof monthlyBookings !== "undefined" ? monthlyBookings : []) %>,
+    "ratings": <%- JSON.stringify(
+        typeof ratingDistribution !== "undefined"
+            ? [
+                ratingDistribution[5] || 0,
+                ratingDistribution[4] || 0,
+                ratingDistribution[3] || 0,
+                ratingDistribution[2] || 0,
+                ratingDistribution[1] || 0
+              ]
+            : [0,0,0,0,0]
+    ) %>
+}
+</script>
+
+<script>
+
+const chartData = JSON.parse(document.getElementById("chart-data").textContent);
+
+const revenueData = chartData.revenue;
+const bookingData = chartData.bookings;
+const ratingData = chartData.ratings;
+
+const months = [
+    "Jan","Feb","Mar","Apr","May","Jun",
+    "Jul","Aug","Sep","Oct","Nov","Dec"
+];
+
+new Chart(document.getElementById("revenueChart"), {
+
+    type: "bar",
+
+    data: {
+        labels: months,
+        datasets: [{
+            label: "Revenue",
+            data: revenueData,
+            backgroundColor: "#D85A30",
+            borderRadius: 8
+        }]
+    },
+
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+
+});
+
+new Chart(document.getElementById("bookingChart"), {
+
+    type: "line",
+
+    data: {
+        labels: months,
+
+        datasets: [{
+            label: "Bookings",
+            data: bookingData,
+            fill: false,
+            borderColor: "#0d6efd",
+            tension: 0.4
+        }]
+    },
+
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+
+});
+
+new Chart(document.getElementById("ratingChart"), {
+
+    type: "doughnut",
+
+    data: {
+        labels: ["5★", "4★", "3★", "2★", "1★"],
+
+        datasets: [{
+            data: ratingData
+        }]
+    },
+
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "65%"
+    }
+
+});
+
+</script>

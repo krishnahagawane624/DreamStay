@@ -1,0 +1,75 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .otp-card {
+        max-width: 440px;
+        margin: 60px auto;
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+        padding: 36px;
+        text-align: center;
+    }
+
+    .otp-icon {
+        width: 64px;
+        height: 64px;
+        background: #f8f4f1;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 26px;
+        color: #D85A30;
+    }
+
+    .otp-input {
+        letter-spacing: 10px;
+        font-size: 1.6rem;
+        text-align: center;
+        font-weight: 700;
+    }
+</style>
+
+<div class="container">
+
+    <div class="otp-card">
+
+        <div class="otp-icon">
+            <i class="fa-solid fa-envelope-open-text"></i>
+        </div>
+
+        <h3 class="fw-bold mb-2">Verify Your Email</h3>
+
+        <p class="text-muted mb-4">
+            We've sent a 6-digit code to <strong><%= email %></strong>.
+            Enter it below to verify your account.
+        </p>
+
+        <form action="/verify-email" method="POST" class="mb-3">
+
+            <input
+                type="text"
+                name="otp"
+                class="form-control otp-input mb-3"
+                maxlength="6"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                placeholder="------"
+                required
+                autofocus>
+
+            <button type="submit" class="btn btn-dark w-100">Verify</button>
+
+        </form>
+
+        <form action="/verify-email/resend" method="POST">
+            <button type="submit" class="btn btn-link text-decoration-none">
+                Didn't get a code? Resend
+            </button>
+        </form>
+
+    </div>
+
+</div>

@@ -1,0 +1,752 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .detail-hero-img {
+        width: 100%;
+        height: 320px;
+        object-fit: cover;
+        border-radius: 20px;
+    }
+
+    .info-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+        padding: 24px;
+        height: 100%;
+    }
+
+    .info-card h6 {
+        color: #D85A30;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.78rem;
+        letter-spacing: 0.5px;
+        margin-bottom: 16px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #f0ede9;
+        font-size: 0.92rem;
+        gap: 20px;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-row span:first-child {
+        color: #777;
+    }
+
+    .detail-row span:last-child {
+        font-weight: 600;
+        color: #222;
+        text-align: right;
+    }
+
+    .host-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .btn-contact-host {
+        background: #D85A30;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 12px;
+        border: none;
+        padding: 10px 20px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-contact-host:hover {
+        background: #b8461f;
+        color: #fff;
+    }
+
+    .btn-invoice {
+        border: 2px solid #212529;
+        color: #212529;
+        font-weight: 600;
+        border-radius: 12px;
+        padding: 10px 20px;
+        background: transparent;
+        text-decoration: none;
+    }
+
+    .btn-invoice:hover {
+        background: #212529;
+        color: #fff;
+    }
+
+    .status-pill {
+        font-size: 0.8rem;
+        padding: 6px 16px;
+        border-radius: 20px;
+    }
+
+    .refund-card {
+        border-left: 4px solid #D85A30;
+    }
+
+    .refund-amount {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #198754;
+    }
+
+    .refund-policy {
+        background: #fff8f4;
+        border-radius: 12px;
+        padding: 12px 15px;
+        font-size: 0.85rem;
+        color: #555;
+    }
+</style>
+
+
+<div class="container mt-4 mb-5">
+
+    <!-- ============================= -->
+    <!-- TOP BAR -->
+    <!-- ============================= -->
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+
+        <a href="/bookings" class="text-decoration-none text-dark">
+            <i class="fa-solid fa-arrow-left me-2"></i>
+            Back to My Bookings
+        </a>
+
+        <span class="badge status-pill
+            <%= booking.status === 'confirmed'
+                ? 'bg-success'
+                : booking.status === 'cancelled'
+                ? 'bg-danger'
+                : 'bg-secondary' %>">
+
+            <%= booking.status.charAt(0).toUpperCase() + booking.status.slice(1) %>
+
+        </span>
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- PROPERTY IMAGE -->
+    <!-- ============================= -->
+
+    <img
+        src="<%= booking.listing.image.url %>"
+        class="detail-hero-img mb-4"
+        alt="<%= booking.listing.title %>"
+    >
+
+
+    <!-- ============================= -->
+    <!-- PROPERTY TITLE -->
+    <!-- ============================= -->
+
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                <%= booking.listing.title %>
+            </h2>
+
+            <p class="text-muted mb-0">
+                <i class="fa-solid fa-location-dot me-1"></i>
+                <%= booking.listing.location %>,
+                <%= booking.listing.country %>
+            </p>
+
+        </div>
+
+        <span
+            class="text-muted"
+            style="font-family: monospace;"
+        >
+            Booking ID: <%= booking._id %>
+        </span>
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- MAIN INFORMATION -->
+    <!-- ============================= -->
+
+    <div class="row g-4">
+
+
+        <!-- ============================= -->
+        <!-- STAY DETAILS -->
+        <!-- ============================= -->
+
+        <div class="col-md-6">
+
+            <div class="info-card">
+
+                <h6>Stay Details</h6>
+
+                <div class="detail-row">
+                    <span>Check-In</span>
+                    <span>
+                        <%= booking.checkIn.toDateString() %>
+                    </span>
+                </div>
+
+                <div class="detail-row">
+                    <span>Check-Out</span>
+                    <span>
+                        <%= booking.checkOut.toDateString() %>
+                    </span>
+                </div>
+
+                <div class="detail-row">
+                    <span>Nights</span>
+                    <span>
+                        <%= nights %>
+                    </span>
+                </div>
+
+                <div class="detail-row">
+                    <span>Guests</span>
+                    <span>
+                        <%= booking.guests %>
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- PRICE BREAKDOWN -->
+        <!-- ============================= -->
+
+        <div class="col-md-6">
+
+            <div class="info-card">
+
+                <h6>Price Breakdown</h6>
+
+                <div class="detail-row">
+
+                    <span>
+                        Room Charges
+                        (<%= nights %>
+                        night<%= nights > 1 ? "s" : "" %>)
+                    </span>
+
+                    <span>
+                        ₹<%= booking.totalPrice.toLocaleString("en-IN") %>
+                    </span>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span>
+                        Service Fee
+                    </span>
+
+                    <span>
+                        ₹<%= (breakdown.serviceFee || 0)
+                            .toLocaleString("en-IN") %>
+                    </span>
+
+                </div>
+
+
+                <% if ((breakdown.gstAmount || 0) > 0) { %>
+
+                    <div class="detail-row">
+
+                        <span>
+                            GST
+                            (<%= ((breakdown.gstRate || 0) * 100)
+                                .toFixed(0) %>%)
+                        </span>
+
+                        <span>
+                            ₹<%= (breakdown.gstAmount || 0)
+                                .toLocaleString("en-IN") %>
+                        </span>
+
+                    </div>
+
+                <% } %>
+
+
+                <div class="detail-row">
+
+                    <span>
+                        Total Paid
+                    </span>
+
+                    <span>
+                        ₹<%= (booking.grandTotal || booking.totalPrice)
+                            .toLocaleString("en-IN") %>
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- PAYMENT INFORMATION -->
+        <!-- ============================= -->
+
+        <div class="col-md-6">
+
+            <div class="info-card">
+
+                <h6>Payment Information</h6>
+
+
+                <div class="detail-row">
+
+                    <span>
+                        Payment Status
+                    </span>
+
+                    <span>
+
+                        <span class="badge
+                            <%= booking.paymentStatus === 'Paid'
+                                ? 'bg-success'
+                                : booking.paymentStatus === 'Refunded'
+                                ? 'bg-primary'
+                                : 'bg-secondary' %>">
+
+                            <%= booking.paymentStatus || "Pending" %>
+
+                        </span>
+
+                    </span>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span>
+                        Payment ID
+                    </span>
+
+                    <span style="font-size: 0.82rem;">
+                        <%= booking.paymentId || "N/A" %>
+                    </span>
+
+                </div>
+
+
+                <% if (booking.orderId) { %>
+
+                    <div class="detail-row">
+
+                        <span>
+                            Order ID
+                        </span>
+
+                        <span style="font-size: 0.82rem;">
+                            <%= booking.orderId %>
+                        </span>
+
+                    </div>
+
+                <% } %>
+
+
+                <div class="detail-row">
+
+                    <span>
+                        Booking Status
+                    </span>
+
+                    <span>
+                        <%= booking.status %>
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- HOST -->
+        <!-- ============================= -->
+
+        <div class="col-md-6">
+
+            <div class="info-card">
+
+                <h6>Host</h6>
+
+                <div class="d-flex align-items-center gap-3 mb-3">
+
+                    <img
+                        src="<%= booking.listing.owner.profileImage %>"
+                        class="host-avatar"
+                        alt="<%= booking.listing.owner.username %>"
+                    >
+
+                    <div>
+
+                        <div class="fw-bold">
+                            <%= booking.listing.owner.username %>
+                        </div>
+
+                        <div
+                            class="text-muted"
+                            style="font-size: 0.85rem;"
+                        >
+                            <%= booking.listing.owner.responseRate || 0 %>%
+                            response rate ·
+                            <%= booking.listing.owner.responseTime ||
+                                "Usually responds quickly" %>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <a
+                    href="mailto:<%= booking.listing.owner.email %>?subject=Regarding Booking <%= booking._id %>"
+                    class="btn btn-contact-host"
+                >
+
+                    <i class="fa-solid fa-envelope me-1"></i>
+                    Contact Host
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- REFUND DETAILS -->
+        <!-- ================================================= -->
+
+        <% if (booking.status === "cancelled") { %>
+
+            <div class="col-12">
+
+                <div class="info-card refund-card">
+
+                    <h6>
+                        <i class="fa-solid fa-money-bill-transfer me-2"></i>
+                        Refund Details
+                    </h6>
+
+
+                    <!-- CANCELLATION POLICY -->
+
+                    <div class="refund-policy mb-3">
+
+                        <strong>
+                            Cancellation Policy Applied:
+                        </strong>
+
+                        <br>
+
+                        <%= booking.cancellationPolicyApplied ||
+                            "Cancellation policy information unavailable." %>
+
+                    </div>
+
+
+                    <div class="row g-3">
+
+
+                        <!-- REFUND STATUS -->
+
+                        <div class="col-md-6">
+
+                            <div class="detail-row">
+
+                                <span>
+                                    Refund Status
+                                </span>
+
+                                <span>
+
+                                    <% if (booking.refundStatus === "Processed") { %>
+
+                                        <span class="badge bg-success">
+                                            <i class="fa-solid fa-check me-1"></i>
+                                            Refund Processed
+                                        </span>
+
+                                    <% } else if (booking.refundStatus === "Pending") { %>
+
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fa-solid fa-clock me-1"></i>
+                                            Refund Pending
+                                        </span>
+
+                                    <% } else if (booking.refundStatus === "Failed") { %>
+
+                                        <span class="badge bg-danger">
+                                            <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                                            Refund Failed
+                                        </span>
+
+                                    <% } else { %>
+
+                                        <span class="badge bg-secondary">
+                                            No Refund
+                                        </span>
+
+                                    <% } %>
+
+                                </span>
+
+                            </div>
+
+
+                            <div class="detail-row">
+
+                                <span>
+                                    Refund Amount
+                                </span>
+
+                                <span class="refund-amount">
+                                    ₹<%= (booking.refundAmount || 0)
+                                        .toLocaleString("en-IN") %>
+                                </span>
+
+                            </div>
+
+
+                            <div class="detail-row">
+
+                                <span>
+                                    Original Payment
+                                </span>
+
+                                <span>
+                                    ₹<%= (booking.grandTotal || booking.totalPrice)
+                                        .toLocaleString("en-IN") %>
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- REFUND INFORMATION -->
+
+                        <div class="col-md-6">
+
+                            <div class="detail-row">
+
+                                <span>
+                                    Refund ID
+                                </span>
+
+                                <span style="font-size: 0.82rem;">
+                                    <%= booking.refundId || "Not Applicable" %>
+                                </span>
+
+                            </div>
+
+
+                            <div class="detail-row">
+
+                                <span>
+                                    Cancelled At
+                                </span>
+
+                                <span>
+                                    <%= booking.cancelledAt
+                                        ? new Date(booking.cancelledAt).toDateString()
+                                        : "N/A" %>
+                                </span>
+
+                            </div>
+
+
+                            <div class="detail-row">
+
+                                <span>
+                                    Cancellation Status
+                                </span>
+
+                                <span>
+                                    <span class="badge bg-danger">
+                                        Cancelled
+                                    </span>
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- REFUND MESSAGE -->
+
+                    <div class="mt-3">
+
+                        <% if (booking.refundStatus === "Processed") { %>
+
+                            <div class="alert alert-success mb-0">
+
+                                <i class="fa-solid fa-circle-check me-2"></i>
+
+                                <strong>Refund completed.</strong>
+
+                                ₹<%= (booking.refundAmount || 0)
+                                    .toLocaleString("en-IN") %>
+
+                                has been refunded according to the
+                                cancellation policy.
+
+                            </div>
+
+                        <% } else if (booking.refundStatus === "Pending") { %>
+
+                            <div class="alert alert-warning mb-0">
+
+                                <i class="fa-solid fa-clock me-2"></i>
+
+                                <strong>Refund initiated.</strong>
+
+                                The refund of
+                                ₹<%= (booking.refundAmount || 0)
+                                    .toLocaleString("en-IN") %>
+
+                                is currently being processed by Razorpay.
+
+                            </div>
+
+                        <% } else if (booking.refundStatus === "Failed") { %>
+
+                            <div class="alert alert-danger mb-0">
+
+                                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+                                <strong>Refund failed.</strong>
+
+                                The booking was cancelled, but the automatic
+                                refund could not be completed.
+
+                                Please contact DreamStay support.
+
+                            </div>
+
+                        <% } else { %>
+
+                            <div class="alert alert-secondary mb-0">
+
+                                <i class="fa-solid fa-circle-info me-2"></i>
+
+                                <strong>No refund applicable.</strong>
+
+                                According to the cancellation policy,
+                                no refund was due for this cancellation.
+
+                            </div>
+
+                        <% } %>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        <% } %>
+
+    </div>
+
+
+    <!-- ============================= -->
+    <!-- ACTION BUTTONS -->
+    <!-- ============================= -->
+
+    <div class="d-flex flex-wrap gap-3 mt-4">
+
+
+        <!-- DOWNLOAD INVOICE -->
+
+        <a
+            href="/bookings/<%= booking._id %>/invoice"
+            class="btn btn-invoice"
+        >
+
+            <i class="fa-solid fa-file-arrow-down me-1"></i>
+            Download Invoice
+
+        </a>
+
+
+        <!-- CANCELLATION -->
+
+        <% if (booking.status === "confirmed") { %>
+
+            <div
+                class="alert alert-light mb-3"
+                style="max-width: 600px; font-size: 0.85rem;"
+            >
+
+                <i class="fa-solid fa-circle-info me-1"></i>
+
+                <strong>Cancellation Policy:</strong>
+
+                Full refund if cancelled 7+ days before check-in,
+                50% refund if cancelled 3-6 days before,
+                and no refund within 3 days of check-in.
+
+            </div>
+
+
+            <button
+                type="button"
+                class="btn btn-outline-danger"
+                onclick="
+                    if(confirm('Are you sure you want to cancel this booking?')) {
+                        document.getElementById('cancel-form').submit();
+                    }
+                "
+            >
+
+                <i class="fa-solid fa-xmark me-1"></i>
+                Cancel Booking
+
+            </button>
+
+
+            <form
+                id="cancel-form"
+                action="/bookings/<%= booking._id %>?_method=DELETE"
+                method="POST"
+                class="d-none"
+            ></form>
+
+        <% } %>
+
+    </div>
+
+</div>

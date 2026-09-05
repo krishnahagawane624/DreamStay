@@ -1,0 +1,106 @@
+<% layout("/layouts/boilerplate") %>
+
+<h3 class="mb-4 fw-bold">My Listings</h3>
+
+<% if (allListings.length === 0) { %>
+
+    <p class="text-muted">You haven't created any listings yet. <a href="/listings/new">Create one</a>.</p>
+
+<% } else { %>
+
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4">
+
+    <% for(let listing of allListings){ %>
+
+    <div class="col">
+
+        <div class="card listing-card shadow-sm border-0">
+
+            <div class="image-container">
+
+                <a
+                    href="/listings/<%= listing._id %>"
+                    class="listing-link">
+
+                    <img
+                        src="<%= listing.image.url %>"
+                        class="card-img-top listing-img">
+
+                </a>
+
+                <div class="rating-badge">
+
+                    <% if(listing.averageRating && listing.averageRating >= 4.8 && listing.reviewCount >= 5){ %>
+
+                        🏆 Guest Favorite
+                        <br>
+                        ⭐ <%= listing.averageRating %>
+                        (<%= listing.reviewCount %>)
+
+                    <% } else if(listing.averageRating){ %>
+
+                        ⭐ <%= listing.averageRating %>
+                        (<%= listing.reviewCount %>)
+
+                    <% } else { %>
+
+                        🆕 New
+
+                    <% } %>
+
+                </div>
+
+            </div>
+
+            <div class="card-body">
+
+                <a
+                    href="/listings/<%= listing._id %>"
+                    class="listing-link text-decoration-none text-dark">
+
+                    <h5 class="listing-title">
+                        <%= listing.title %>
+                    </h5>
+
+                </a>
+
+                <p class="listing-location">
+                    📍 <%= listing.location %>,
+                    <%= listing.country %>
+                </p>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+
+                    <div>
+                        <span class="price">₹<%= listing.price.toLocaleString("en-IN") %></span>
+                        <span class="night">/ night</span>
+                    </div>
+
+                    <% if(listing.reviewCount > 0){ %>
+                        <small class="text-muted"><%= listing.reviewCount %> Reviews</small>
+                    <% } %>
+
+                </div>
+
+                <!-- Host quick actions -->
+                <div class="d-flex gap-2 mt-3">
+
+                    <a href="/listings/<%= listing._id %>/edit" class="btn btn-sm btn-outline-secondary">Edit</a>
+
+                    <form action="/listings/<%= listing._id %>?_method=DELETE" method="POST" class="m-0">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this listing?')">Delete</button>
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <% } %>
+
+</div>
+
+<% } %>

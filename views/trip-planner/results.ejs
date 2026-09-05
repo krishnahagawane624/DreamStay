@@ -1,0 +1,91 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .day-card { border: 1px solid #eee; border-radius: 16px; padding: 22px; margin-bottom: 16px; }
+    .day-badge { display: inline-block; background: #D85A30; color: #fff; font-weight: 700; font-size: 0.78rem; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; }
+</style>
+
+<div class="container py-4">
+
+    <a href="/trip-planner" class="text-decoration-none text-dark d-inline-block mb-3">
+        <i class="fa-solid fa-arrow-left me-2"></i> Plan Another Trip
+    </a>
+
+    <h2 class="fw-bold mb-1">
+        <i class="fa-solid fa-robot" style="color:#D85A30;"></i>
+        Your Trip Plan: <%= searchParams.city %>
+    </h2>
+
+    <p class="text-muted mb-4">
+        <%= searchParams.days %> days · ₹<%= searchParams.budget.toLocaleString("en-IN") %> budget ·
+        <%= searchParams.people %> traveller<%= searchParams.people > 1 ? "s" : "" %>
+    </p>
+
+    <% if (plan) { %>
+
+        <div class="alert alert-light mb-4"><%= plan.summary %></div>
+
+        <h4 class="fw-bold mb-3">Day-by-Day Itinerary</h4>
+
+        <% for (let day of (plan.itinerary || [])) { %>
+
+            <div class="day-card">
+                <span class="day-badge">Day <%= day.day %></span>
+                <h5 class="fw-bold"><%= day.title %></h5>
+                <ul class="mb-0">
+                    <% for (let activity of (day.activities || [])) { %>
+                        <li><%= activity %></li>
+                    <% } %>
+                </ul>
+            </div>
+
+        <% } %>
+
+        <% if (plan.budgetTips) { %>
+            <div class="alert alert-light mt-4">
+                <i class="fa-solid fa-lightbulb me-2"></i>
+                <strong>Budget Tips:</strong> <%= plan.budgetTips %>
+            </div>
+        <% } %>
+
+    <% } %>
+
+    <hr class="my-5">
+
+    <h4 class="fw-bold mb-3">Matching Listings in <%= searchParams.city %></h4>
+
+    <% if (matchedListings.length === 0) { %>
+
+        <div class="alert alert-light">No listings found matching this city and budget. Try a different city or a higher budget.</div>
+
+    <% } else { %>
+
+        <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4">
+
+            <% for (let listing of matchedListings) { %>
+
+                <div class="col">
+                    <a href="/listings/<%= listing._id %>" class="listing-link text-decoration-none text-dark">
+                        <div class="card listing-card shadow-sm border-0">
+                            <div class="image-container">
+                                <img src="<%= listing.image.url %>" class="card-img-top listing-img">
+                            </div>
+                            <div class="card-body">
+                                <h5 class="listing-title"><%= listing.title %></h5>
+                                <p class="listing-location">📍 <%= listing.location %>, <%= listing.country %></p>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span class="price">₹<%= listing.price.toLocaleString("en-IN") %></span>
+                                    <span class="night">/ night</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+            <% } %>
+
+        </div>
+
+    <% } %>
+
+</div>

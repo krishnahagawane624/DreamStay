@@ -1,0 +1,102 @@
+ <% layout("/layouts/boilerplate") %>
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Compare Listings</h2>
+        <a href="/listings" class="btn btn-outline-dark btn-sm">
+            <i class="fa-solid fa-arrow-left"></i> Back to Listings
+        </a>
+    </div>
+
+    <% if (listings.length === 0) { %>
+
+        <p class="text-muted">No listings selected. Go back and pick a few to compare.</p>
+
+    <% } else { %>
+
+    <div class="table-responsive">
+        <table class="table align-middle compare-table">
+            <thead>
+                <tr>
+                    <th>Listing</th>
+                    <% listings.forEach(listing => { %>
+                        <th class="text-center">
+                            <img src="<%= listing.image.url %>" class="compare-img mb-2" alt="<%= listing.title %>">
+                            <div><%= listing.title %></div>
+                        </th>
+                    <% }) %>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="fw-bold">Price / night</td>
+                    <% listings.forEach(listing => { %>
+                        <td class="text-center">₹<%= listing.price.toLocaleString("en-IN") %></td>
+                    <% }) %>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Rating</td>
+                    <% listings.forEach(listing => { %>
+                        <td class="text-center">
+                            <% if (listing.averageRating) { %>
+                                ⭐ <%= listing.averageRating %> (<%= listing.reviewCount %>)
+                            <% } else { %>
+                                🆕 New
+                            <% } %>
+                        </td>
+                    <% }) %>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Max Guests</td>
+                    <% listings.forEach(listing => { %>
+                        <td class="text-center"><%= listing.maxGuests %></td>
+                    <% }) %>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Bedrooms</td>
+                    <% listings.forEach(listing => { %>
+                        <td class="text-center"><%= listing.bedrooms %></td>
+                    <% }) %>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Category</td>
+                    <% listings.forEach(listing => { %>
+                        <td class="text-center"><%= listing.category %></td>
+                    <% }) %>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Location</td>
+                    <% listings.forEach(listing => { %>
+                        <td class="text-center"><%= listing.location %>, <%= listing.country %></td>
+                    <% }) %>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Amenities</td>
+                    <% listings.forEach(listing => { %>
+                        <td class="text-center">
+                            <% if (listing.amenities && listing.amenities.length > 0) { %>
+                                <% listing.amenities.forEach(amenity => { %>
+                                    <span class="badge bg-light text-dark border me-1 mb-1"><%= amenity %></span>
+                                <% }) %>
+                            <% } else { %>
+                                —
+                            <% } %>
+                        </td>
+                    <% }) %>
+                </tr>
+                <tr>
+                    <td class="fw-bold"></td>
+                    <% listings.forEach(listing => { %>
+                        <td class="text-center">
+                            <a href="/listings/<%= listing._id %>" class="btn btn-sm btn-dark">View Listing</a>
+                        </td>
+                    <% }) %>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <% } %>
+
+</div>

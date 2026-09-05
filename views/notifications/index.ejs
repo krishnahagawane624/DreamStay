@@ -1,0 +1,73 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+
+    .notification-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 8px;
+        border: 1px solid #eee;
+        background: #f8f9fa;
+    }
+
+    .notification-item.unread {
+        background: #fff4f0;
+    }
+
+</style>
+
+<div class="container py-4" style="max-width: 700px;">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h3 class="fw-bold mb-0">Notifications</h3>
+
+        <% if (notifications.some(n => !n.isRead)) { %>
+
+            <form action="/notifications/read-all?_method=PUT" method="POST" class="m-0">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">Mark all as read</button>
+            </form>
+
+        <% } %>
+
+    </div>
+
+    <% if (notifications.length === 0) { %>
+
+        <p class="text-muted">No notifications yet.</p>
+
+    <% } %>
+
+    <% for (let note of notifications) { %>
+
+        <div class="notification-item <%= note.isRead ? '' : 'unread' %>">
+
+            <div>
+
+                <p class="mb-1"><%= note.message %></p>
+
+                <small class="text-muted"><%= new Date(note.createdAt).toLocaleString("en-IN") %></small>
+
+                <% if (note.link) { %>
+                    <br>
+                    <a href="<%= note.link %>" class="small">View</a>
+                <% } %>
+
+            </div>
+
+            <% if (!note.isRead) { %>
+
+                <form action="/notifications/<%= note._id %>/read?_method=PUT" method="POST" class="m-0">
+                    <button type="submit" class="btn btn-sm btn-link p-0">Mark read</button>
+                </form>
+
+            <% } %>
+
+        </div>
+
+    <% } %>
+
+</div>
