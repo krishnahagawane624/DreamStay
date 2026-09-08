@@ -197,7 +197,7 @@ app.use("/ai-chat", aiChatRouter);
 
 
 app.get("/", (req, res) => {
-    res.send("Hi, I am groot");
+    res.redirect("/listings");
 });
 
 app.use("/listings", listingRouter);
