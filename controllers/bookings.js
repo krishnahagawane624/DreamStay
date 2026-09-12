@@ -67,14 +67,7 @@ module.exports.createBooking = async (req, res) => {
 
     if (!checkIn || !checkOut || !guests) {
 
-        console.log("BOOKING DATA MISSING:", {
-            checkIn,
-            checkOut,
-            guests,
-            paymentId,
-            orderId,
-        });
-
+      
         req.flash(
             "error",
             "Incomplete booking details."
