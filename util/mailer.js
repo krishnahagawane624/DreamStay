@@ -1,4 +1,7 @@
+const dns = require("dns");
 const nodemailer = require("nodemailer");
+
+dns.setDefaultResultOrder("ipv4first");
 
 // Uses Gmail SMTP. Requires EMAIL_USER and EMAIL_PASS
 // (a Gmail App Password, NOT your normal Gmail password)
@@ -6,8 +9,7 @@ const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
     secure: false,
-    family: 4,
-    auth: {
+        auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
